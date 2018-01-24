@@ -1,0 +1,45 @@
+# FastInv
+An easy and fast API to create advenced menus on Bukkit
+
+Works with all Bukkit versions from 1.7.10 to 1.12.2.
+
+You need Java 8
+
+## How to use
+Using it is really easy, add the FastInv class in your projet first just add `FastInv.init(this);` in the `onEnable` of your plugin like this:
+
+```java
+  @Override
+	public void onEnable() {
+		FastInv.init(this);
+	}
+```
+
+Then you can create a new FastInv and add items,  this is just a quick exemple of inventory with animations
+
+```java
+    FastInv inv = new FastInv(54, "Custom Menu");
+		inv.addItem(22, new ItemStack(Material.NAME_TAG), e -> inv.addItem(new ItemStack(Material.OBSIDIAN)))
+			.onUpdate(20, () -> inv.addItem(int1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) r.nextInt(15))))
+			.onUpdate(10, () -> inv.addItem(int2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) r.nextInt(15))))
+			.open((Player) sender);
+```
+
+If you want to prevent the players to close inventory just cancel the FastInvCloseEvent:
+```java
+inv.onCloseEvent(event -> event.setCancelled(true));
+```
+
+By default, when all players close the inventory, the inventory will be destroye; all tasks are cancelle and listeners are unregister, 
+but if you want to use the same inventory multiples times, you just need to add this
+```java
+inv.setWillDestroy(false);
+```
+
+## Features
+* Custom inventorie (size, title and type)
+* Items with custom ClickEvent
+* Add the same 
+* Update task with configurable delay
+* Option to prevent player to close the inventory
+* Supports multiple update tasks with configurable delay
