@@ -365,7 +365,7 @@ public class FastInv {
 		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
-	class FastInvClickEvent {
+	public class FastInvClickEvent {
 
 		private Player player;
 		private FastInv inventory;
@@ -409,7 +409,7 @@ public class FastInv {
 		}
 	}
 
-	class FastInvCloseEvent {
+	public class FastInvCloseEvent {
 
 		private Player player;
 		private FastInv inventory;
