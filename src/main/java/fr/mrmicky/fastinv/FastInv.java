@@ -2,7 +2,8 @@ package fr.mrmicky.fastinv;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -40,11 +41,11 @@ public class FastInv {
 	private Listener listener;
 	private boolean destroy = false;
 	private boolean willDestroy = true;
-	private List<Player> viewers = new ArrayList<>();
-	private List<FastInvCloseListener> menuListeners = new ArrayList<>();
-	private List<FastInvClickListener> clickListeners = new ArrayList<>();
+	private Set<Player> viewers = new HashSet<>();
+	private Set<FastInvCloseListener> menuListeners = new HashSet<>();
+	private Set<FastInvClickListener> clickListeners = new HashSet<>();
 	private HashMap<Integer, FastInvClickListener> itemListeners = new HashMap<>();
-	private List<BukkitTask> tasks = new ArrayList<>();
+	private Set<BukkitTask> tasks = new HashSet<>();
 
 	/**
 	 * Create a new FastInv with a custom size
@@ -259,7 +260,7 @@ public class FastInv {
 		return this.destroy;
 	}
 
-	public List<Player> getViewers() {
+	public Set<Player> getViewers() {
 		return this.viewers;
 	}
 
@@ -276,9 +277,9 @@ public class FastInv {
 		if (destroy) {
 			return;
 		}
-		new ArrayList<>(viewers).forEach(p -> p.closeInventory());
+		new ArrayList<>(viewers).forEach(Player::closeInventory);
 		HandlerList.unregisterAll(listener);
-		tasks.forEach(t -> t.cancel());
+		tasks.forEach(BukkitTask::cancel);
 		destroy = true;
 	}
 
