@@ -312,14 +312,14 @@ public class FastInv {
 			@EventHandler
 			public void onClick(InventoryClickEvent e) {
 				if (e.getInventory().equals(inv) && e.getCurrentItem() != null && e.getWhoClicked() instanceof Player) {
-					e.setCancelled(true);
 					int slot = e.getRawSlot();
 					FastInvClickEvent ev = new FastInvClickEvent((Player) e.getWhoClicked(), FastInv.this, slot,
-							e.getCurrentItem(), e.getAction(), e.getClick());
+							e.getCurrentItem(), true, e.getAction(), e.getClick());
 					if (itemListeners.containsKey(slot)) {
 						itemListeners.get(slot).onClick(ev);
 					}
 					clickListeners.forEach(l -> l.onClick(ev));
+					e.setCancelled(ev.isCancelled());
 				}
 			}
 
@@ -371,15 +371,17 @@ public class FastInv {
 		private FastInv inventory;
 		private int slot;
 		private ItemStack item;
+		private boolean cancelled;
 		private InventoryAction action;
 		private ClickType clickType;
 
-		public FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, InventoryAction action,
-				ClickType clickType) {
+		public FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, boolean cancelled,
+				InventoryAction action, ClickType clickType) {
 			this.player = player;
 			this.inventory = inventory;
 			this.slot = slot;
 			this.item = item;
+			this.cancelled = cancelled;
 			this.action = action;
 			this.clickType = clickType;
 		}
@@ -398,6 +400,14 @@ public class FastInv {
 
 		public ItemStack getItem() {
 			return this.item;
+		}
+
+		public boolean isCancelled() {
+			return this.cancelled;
+		}
+
+		public void setCancelled(boolean cancelled) {
+			this.cancelled = cancelled;
 		}
 
 		public InventoryAction getAction() {

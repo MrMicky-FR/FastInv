@@ -30,6 +30,11 @@ If you want to prevent the players to close inventory just cancel the FastInvClo
 inv.onClose(event -> event.setCancelled(true));
 ```
 
+If you don't want to cancel the InventoryClickEvent when a player click just do this:
+```java
+inv.onClick(e -> e.setCancelled(false));
+```
+
 By default, when all players close the inventory, the inventory will be destroye; all tasks are cancelle and listeners are unregister, 
 but if you want to use the same inventory multiples times, you just need to add this
 ```java
