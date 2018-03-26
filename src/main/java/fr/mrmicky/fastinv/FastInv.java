@@ -229,10 +229,7 @@ public class FastInv {
 	}
 
 	public FastInv onUpdate(long period, Runnable runnable) {
-		checkDestroy();
-
-		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, period, period));
-		return this;
+		return onUpdate(period, period, runnable);
 	}
 
 	public FastInv onUpdate(long delay, long period, Runnable runnable) {
