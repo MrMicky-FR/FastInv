@@ -25,7 +25,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 /**
  * A fast API to easely create advanced GUI
- * 
+ *
  * @author MrMicky
  * @version 1.0
  */
@@ -49,7 +49,7 @@ public class FastInv {
 
 	/**
 	 * Create a new FastInv with a custom size
-	 * 
+	 *
 	 * @param size
 	 *            The size of the inventory
 	 */
@@ -59,7 +59,7 @@ public class FastInv {
 
 	/**
 	 * Create a new FastInv with a custom size and title
-	 * 
+	 *
 	 * @param size
 	 *            The size of the inventory
 	 * @param title
@@ -71,8 +71,8 @@ public class FastInv {
 
 	/**
 	 * Create a new FastInv with a custom type
-	 * 
-	 * @param size
+	 *
+	 * @param type
 	 *            The type of the inventory
 	 */
 	public FastInv(InventoryType type) {
@@ -81,7 +81,7 @@ public class FastInv {
 
 	/**
 	 * Create a new FastInv with a custom type and title
-	 * 
+	 *
 	 * @param type
 	 *            The type of the inventory
 	 * @param title
@@ -104,7 +104,7 @@ public class FastInv {
 
 	/**
 	 * Add an item to the inventory
-	 * 
+	 *
 	 * @param item
 	 *            The item to add
 	 * @return the FastInv build
@@ -116,7 +116,7 @@ public class FastInv {
 	/**
 	 * Add an item to the inventory with a {@link FastInvClickListener} to
 	 * handle click
-	 * 
+	 *
 	 * @param item
 	 *            The item to add
 	 * @param listener
@@ -133,7 +133,7 @@ public class FastInv {
 
 	/**
 	 * Add an item to the inventory on a specific slot
-	 * 
+	 *
 	 * @param slot
 	 *            The slot of the item
 	 * @param item
@@ -147,7 +147,7 @@ public class FastInv {
 	/**
 	 * Add an item to the inventory on specific slot with a
 	 * {@link FastInvClickListener} to handle click
-	 * 
+	 *
 	 * @param slot
 	 *            The slot of the item
 	 * @param item
@@ -170,7 +170,7 @@ public class FastInv {
 
 	/**
 	 * Add an item to the inventory on a multiples slots
-	 * 
+	 *
 	 * @param slots
 	 *            The slot of the item
 	 * @param item
@@ -184,7 +184,7 @@ public class FastInv {
 	/**
 	 * Add an item to the inventory on multiples slots with a
 	 * {@link FastInvClickListener} to handle click
-	 * 
+	 *
 	 * @param slots
 	 *            The slots of the item
 	 * @param item
@@ -202,7 +202,7 @@ public class FastInv {
 
 	/**
 	 * Add a {@link FastInvCloseListener} to listen on inventory close
-	 * 
+	 *
 	 * @param listener
 	 *            The {@link FastInvCloseListener} to add
 	 * @return the FastInv builder
@@ -216,7 +216,7 @@ public class FastInv {
 
 	/**
 	 * Add a {@link FastInvClickListener} to listen on inventory click
-	 * 
+	 *
 	 * @param listener
 	 *            The {@link FastInvClickListener} to add
 	 * @return the FastInv builder
@@ -228,16 +228,23 @@ public class FastInv {
 		return this;
 	}
 
-	public FastInv onUpdate(int delay, Runnable runnable) {
+	public FastInv onUpdate(long period, Runnable runnable) {
 		checkDestroy();
 
-		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, delay));
+		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, period, period));
+		return this;
+	}
+
+	public FastInv onUpdate(long delay, long period, Runnable runnable) {
+		checkDestroy();
+
+		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period));
 		return this;
 	}
 
 	/**
 	 * Open the menu to players
-	 * 
+	 *
 	 * @param players
 	 *            The players to open the menu
 	 * @return the FastInv builder
@@ -285,7 +292,7 @@ public class FastInv {
 
 	/**
 	 * Set if the menu will be destory when all viewers close it
-	 * 
+	 *
 	 * @param destroy
 	 *            Set if the menu will destory
 	 * @return the FastInv builder
@@ -375,7 +382,7 @@ public class FastInv {
 		private InventoryAction action;
 		private ClickType clickType;
 
-		public FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, boolean cancelled,
+		FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, boolean cancelled,
 				InventoryAction action, ClickType clickType) {
 			this.player = player;
 			this.inventory = inventory;
@@ -425,7 +432,7 @@ public class FastInv {
 		private FastInv inventory;
 		private boolean cancelled;
 
-		public FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
+		FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
 			this.player = player;
 			this.inventory = inventory;
 			this.cancelled = cancelled;
