@@ -21,9 +21,6 @@ public class ExemplePlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		FastInv.init(this);
-		
-		FastInv inv = new FastInv(54);
-		inv.onClose(event -> event.setCancelled(true));
 	}
 
 	@Override
