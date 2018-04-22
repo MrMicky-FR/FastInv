@@ -1,6 +1,5 @@
 package fr.mrmicky.fastinv;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -8,17 +7,16 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -27,21 +25,22 @@ import org.bukkit.scheduler.BukkitTask;
  * A fast API to easely create advanced GUI
  *
  * @author MrMicky
- * @version 1.0
+ * @version 2.0
+ * 
  */
-public class FastInv {
+public class FastInv implements InventoryHolder {
 
-	private static Plugin plugin;
+	private static Plugin plugin = null;
 
 	public static void init(Plugin plugin) {
-		FastInv.plugin = plugin;
+		if (FastInv.plugin == null) {
+			FastInv.plugin = plugin;
+			Bukkit.getPluginManager().registerEvents(getListener(), plugin);
+		}
 	}
 
 	private Inventory inv;
-	private Listener listener;
-	private boolean destroy = false;
-	private boolean willDestroy = true;
-	private Set<Player> viewers = new HashSet<>();
+	private boolean cancelTasksOnClose = true;
 	private Set<FastInvCloseListener> menuListeners = new HashSet<>();
 	private Set<FastInvClickListener> clickListeners = new HashSet<>();
 	private HashMap<Integer, FastInvClickListener> itemListeners = new HashMap<>();
@@ -54,7 +53,7 @@ public class FastInv {
 	 *            The size of the inventory
 	 */
 	public FastInv(int size) {
-		this(Bukkit.createInventory(null, size));
+		this(size, "FastInv");
 	}
 
 	/**
@@ -66,7 +65,7 @@ public class FastInv {
 	 *            The title of the inventory
 	 */
 	public FastInv(int size, String title) {
-		this(Bukkit.createInventory(null, size, title));
+		this(size, InventoryType.CHEST, title);
 	}
 
 	/**
@@ -76,7 +75,7 @@ public class FastInv {
 	 *            The type of the inventory
 	 */
 	public FastInv(InventoryType type) {
-		this(Bukkit.createInventory(null, type));
+		this(type, "FastInv");
 	}
 
 	/**
@@ -88,18 +87,15 @@ public class FastInv {
 	 *            The title of the inventory
 	 */
 	public FastInv(InventoryType type, String title) {
-		this(Bukkit.createInventory(null, type, title));
+		this(0, type, title);
 	}
 
-	private FastInv(Inventory inv) {
-		checkDestroy();
-		if (this.inv != null) {
-			throw new IllegalStateException("Inventory is already init");
+	private FastInv(int size, InventoryType type, String title) {
+		if (type == InventoryType.CHEST && size > 0) {
+			inv = Bukkit.createInventory(this, size, title);
+		} else {
+			inv = Bukkit.createInventory(this, type, title);
 		}
-
-		this.inv = inv;
-
-		registerListener();
 	}
 
 	/**
@@ -125,7 +121,7 @@ public class FastInv {
 	 */
 	public FastInv addItem(ItemStack item, FastInvClickListener listener) {
 		int slot = inv.firstEmpty();
-		if (slot != -1) {
+		if (slot > 0) {
 			return addItem(slot, item, listener);
 		}
 		return this;
@@ -157,8 +153,6 @@ public class FastInv {
 	 * @return the FastInv builder
 	 */
 	public FastInv addItem(int slot, ItemStack item, FastInvClickListener listener) {
-		checkDestroy();
-
 		inv.setItem(slot, item);
 		if (listener != null) {
 			itemListeners.put(slot, listener);
@@ -208,8 +202,6 @@ public class FastInv {
 	 * @return the FastInv builder
 	 */
 	public FastInv onClose(FastInvCloseListener listener) {
-		checkDestroy();
-
 		menuListeners.add(listener);
 		return this;
 	}
@@ -222,8 +214,6 @@ public class FastInv {
 	 * @return the FastInv builder
 	 */
 	public FastInv onClick(FastInvClickListener listener) {
-		checkDestroy();
-
 		clickListeners.add(listener);
 		return this;
 	}
@@ -233,8 +223,6 @@ public class FastInv {
 	}
 
 	public FastInv onUpdate(long delay, long period, Runnable runnable) {
-		checkDestroy();
-
 		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period));
 		return this;
 	}
@@ -247,102 +235,74 @@ public class FastInv {
 	 * @return the FastInv builder
 	 */
 	public FastInv open(Player... players) {
-		checkDestroy();
-
 		for (Player p : players) {
-			viewers.add(p);
 			p.openInventory(inv);
 		}
 		return this;
 	}
 
+	/**
+	 * Cancel all tasks
+	 */
+	public void cancelTasks() {
+		tasks.forEach(BukkitTask::cancel);
+		tasks.clear();
+	}
+
+	/**
+	 * Set if the tasks will be cancel on inventory close
+	 *
+	 * @param cancelTasksOnClose
+	 *            Set if the menu will destory
+	 * @return the FastInv builder
+	 */
+	public FastInv setCancelTasksOnClose(boolean cancelTasksOnClose) {
+		this.cancelTasksOnClose = cancelTasksOnClose;
+		return this;
+	}
+
+	@Override
 	public Inventory getInventory() {
 		return inv;
 	}
 
-	public boolean isDestroy() {
-		return this.destroy;
-	}
-
-	public Set<Player> getViewers() {
-		return this.viewers;
-	}
-
-	private void checkDestroy() {
-		if (destroy) {
-			throw new IllegalStateException("This inv is destroyed");
-		}
-	}
-
-	/**
-	 * Destory this FastInv (cancel the tasks and unregister the listners)
-	 */
-	public void destroy() {
-		if (destroy) {
-			return;
-		}
-		new ArrayList<>(viewers).forEach(Player::closeInventory);
-		HandlerList.unregisterAll(listener);
-		tasks.forEach(BukkitTask::cancel);
-		destroy = true;
-	}
-
-	/**
-	 * Set if the menu will be destory when all viewers close it
-	 *
-	 * @param destroy
-	 *            Set if the menu will destory
-	 * @return the FastInv builder
-	 */
-	public FastInv setWillDestroy(boolean destroy) {
-		this.willDestroy = destroy;
-		return this;
-	}
-
-	private void registerListener() {
-		listener = new Listener() {
-
-			@EventHandler
-			public void onOpen(InventoryOpenEvent e) {
-				if (e.getInventory().equals(inv) && e.getPlayer() instanceof Player) {
-					Player p = (Player) e.getPlayer();
-					checkDestroy();
-					if (!viewers.contains(p)) {
-						viewers.add(p);
-					}
-				}
-			}
+	private static Listener getListener() {
+		return new Listener() {
 
 			@EventHandler
 			public void onClick(InventoryClickEvent e) {
-				if (e.getInventory().equals(inv) && e.getCurrentItem() != null && e.getWhoClicked() instanceof Player) {
+				if (e.getInventory().getHolder() instanceof FastInv && e.getWhoClicked() instanceof Player) {
 					int slot = e.getRawSlot();
-					FastInvClickEvent ev = new FastInvClickEvent((Player) e.getWhoClicked(), FastInv.this, slot,
+					FastInv inv = (FastInv) e.getInventory().getHolder();
+					FastInvClickEvent ev = new FastInvClickEvent((Player) e.getWhoClicked(), inv, slot,
 							e.getCurrentItem(), true, e.getAction(), e.getClick());
-					if (itemListeners.containsKey(slot)) {
-						itemListeners.get(slot).onClick(ev);
+
+					if (inv.itemListeners.containsKey(slot)) {
+						inv.itemListeners.get(slot).onClick(ev);
 					}
-					clickListeners.forEach(l -> l.onClick(ev));
-					e.setCancelled(ev.isCancelled());
+
+					inv.clickListeners.forEach(l -> l.onClick(ev));
+
+					if (ev.isCancelled()) {
+						e.setCancelled(true);
+					}
 				}
 			}
 
 			@EventHandler
 			public void onClose(InventoryCloseEvent e) {
-				if (e.getInventory().equals(inv) && e.getPlayer() instanceof Player) {
+				if (e.getInventory().getHolder() instanceof FastInv && e.getPlayer() instanceof Player) {
 					Player p = (Player) e.getPlayer();
+					FastInv inv = (FastInv) e.getInventory().getHolder();
 
-					FastInvCloseEvent ev = new FastInvCloseEvent(p, FastInv.this, false);
-					menuListeners.forEach(l -> l.onClose(ev));
+					FastInvCloseEvent ev = new FastInvCloseEvent(p, inv, false);
+					inv.menuListeners.forEach(l -> l.onClose(ev));
 
 					if (ev.isCancelled()) {
-						// delay to prevent big errors
-						Bukkit.getScheduler().runTask(plugin, () -> p.openInventory(inv));
-					} else {
-						viewers.remove(p);
-						if (viewers.isEmpty() && willDestroy) {
-							destroy();
-						}
+						// delay to prevent errors
+						Bukkit.getScheduler().runTask(plugin, () -> p.openInventory(inv.getInventory()));
+					} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
+						inv.cancelTasks();
 					}
 				}
 			}
@@ -350,10 +310,12 @@ public class FastInv {
 			@EventHandler
 			public void onQuit(PlayerQuitEvent e) {
 				Player p = e.getPlayer();
-				if (viewers.remove(p)) {
-					menuListeners.forEach(l -> l.onClose(new FastInvCloseEvent(p, FastInv.this, false)));
-					if (viewers.isEmpty() && willDestroy) {
-						destroy();
+				Inventory inv = p.getOpenInventory().getTopInventory();
+				if (inv.getHolder() instanceof FastInv) {
+					FastInv fastInv = (FastInv) inv;
+					fastInv.menuListeners.forEach(l -> l.onClose(new FastInvCloseEvent(p, fastInv, false)));
+					if (fastInv.getInventory().getViewers().isEmpty() && fastInv.cancelTasksOnClose) {
+						fastInv.cancelTasks();
 					}
 				}
 			}
@@ -361,15 +323,15 @@ public class FastInv {
 			@EventHandler
 			public void onDisable(PluginDisableEvent e) {
 				if (e.getPlugin().equals(plugin)) {
-					destroy();
+					Bukkit.getOnlinePlayers().stream()
+							.filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
+							.forEach(Player::closeInventory);
 				}
 			}
 		};
-
-		Bukkit.getPluginManager().registerEvents(listener, plugin);
 	}
 
-	public class FastInvClickEvent {
+	public static class FastInvClickEvent {
 
 		private Player player;
 		private FastInv inventory;
@@ -423,7 +385,7 @@ public class FastInv {
 		}
 	}
 
-	public class FastInvCloseEvent {
+	public static class FastInvCloseEvent {
 
 		private Player player;
 		private FastInv inventory;
