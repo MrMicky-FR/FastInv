@@ -13,7 +13,6 @@ import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
@@ -25,7 +24,7 @@ import org.bukkit.scheduler.BukkitTask;
  * A fast API to easely create advanced GUI
  *
  * @author MrMicky
- * @version 2.0
+ * @version 2.0.1
  * 
  */
 public class FastInv implements InventoryHolder {
@@ -298,25 +297,14 @@ public class FastInv implements InventoryHolder {
 					FastInvCloseEvent ev = new FastInvCloseEvent(p, inv, false);
 					inv.menuListeners.forEach(l -> l.onClose(ev));
 
-					if (ev.isCancelled()) {
+					Bukkit.getScheduler().runTask(plugin, () -> {
 						// delay to prevent errors
-						Bukkit.getScheduler().runTask(plugin, () -> p.openInventory(inv.getInventory()));
-					} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
-						inv.cancelTasks();
-					}
-				}
-			}
-
-			@EventHandler
-			public void onQuit(PlayerQuitEvent e) {
-				Player p = e.getPlayer();
-				Inventory inv = p.getOpenInventory().getTopInventory();
-				if (inv.getHolder() instanceof FastInv) {
-					FastInv fastInv = (FastInv) inv;
-					fastInv.menuListeners.forEach(l -> l.onClose(new FastInvCloseEvent(p, fastInv, false)));
-					if (fastInv.getInventory().getViewers().isEmpty() && fastInv.cancelTasksOnClose) {
-						fastInv.cancelTasks();
-					}
+						if (ev.isCancelled()) {
+							inv.open(p);
+						} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
+							inv.cancelTasks();
+						}
+					});
 				}
 			}
 

@@ -1,5 +1,5 @@
-name: FastInvExamplePlugin
-version: 1.0
+name: FastInvTest
+version: ${project.version}
 author: MrMicky
 description: Create fast and easy menu in few lines with only one class
 main: fr.mrmicky.fastinv.ExemplePlugin

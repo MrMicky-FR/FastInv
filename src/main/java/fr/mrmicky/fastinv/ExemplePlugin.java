@@ -31,10 +31,14 @@ public class ExemplePlugin extends JavaPlugin {
 			int[] int2 = new int[] { 1, 3, 5, 7, 46, 48, 50, 52 };
 			FastInv inv = new FastInv(54, "Custom Menu");
 			
+			int id = r.nextInt();
+			
 			inv.addItem(22, new ItemStack(Material.NAME_TAG), e -> inv.addItem(new ItemStack(Material.OBSIDIAN)))
 				.onUpdate(20, () -> inv.addItem(int1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) r.nextInt(15))))
 				.onUpdate(10, () -> inv.addItem(int2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) r.nextInt(15))))
 				.onClick(e -> p.sendMessage("You clicked on slot " + e.getSlot()))
+				.onClose(e -> getLogger().warning("Inventory close"))
+				.onUpdate(50, () -> getLogger().info("Update Inv: " + id))
 				.open(p);
 		}
 		return true;
