@@ -299,7 +299,7 @@ public class FastInv implements InventoryHolder {
 
 					Bukkit.getScheduler().runTask(plugin, () -> {
 						// delay to prevent errors
-						if (ev.isCancelled()) {
+						if (ev.isCancelled() && p.isOnline()) {
 							inv.open(p);
 						} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
 							inv.cancelTasks();
