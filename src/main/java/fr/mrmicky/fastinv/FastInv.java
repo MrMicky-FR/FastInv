@@ -40,7 +40,7 @@ public class FastInv implements InventoryHolder {
 
 	private Inventory inv;
 	private boolean cancelTasksOnClose = true;
-	private Set<FastInvCloseListener> menuListeners = new HashSet<>();
+	private Set<FastInvCloseListener> closeListeners = new HashSet<>();
 	private Set<FastInvClickListener> clickListeners = new HashSet<>();
 	private HashMap<Integer, FastInvClickListener> itemListeners = new HashMap<>();
 	private Set<BukkitTask> tasks = new HashSet<>();
@@ -201,7 +201,7 @@ public class FastInv implements InventoryHolder {
 	 * @return the FastInv builder
 	 */
 	public FastInv onClose(FastInvCloseListener listener) {
-		menuListeners.add(listener);
+		closeListeners.add(listener);
 		return this;
 	}
 
@@ -233,11 +233,12 @@ public class FastInv implements InventoryHolder {
 	 *            The players to open the menu
 	 * @return the FastInv builder
 	 */
-	public FastInv open(Player... players) {
-		for (Player p : players) {
-			p.openInventory(inv);
-		}
-		return this;
+	public void open(Player... players) {
+		Bukkit.getScheduler().runTask(plugin, () -> {
+			for (Player p : players) {
+				p.openInventory(inv);
+			}
+		});
 	}
 
 	/**
@@ -295,12 +296,12 @@ public class FastInv implements InventoryHolder {
 					FastInv inv = (FastInv) e.getInventory().getHolder();
 
 					FastInvCloseEvent ev = new FastInvCloseEvent(p, inv, false);
-					inv.menuListeners.forEach(l -> l.onClose(ev));
+					inv.closeListeners.forEach(l -> l.onClose(ev));
 
 					Bukkit.getScheduler().runTask(plugin, () -> {
 						// delay to prevent errors
 						if (ev.isCancelled() && p.isOnline()) {
-							inv.open(p);
+							p.openInventory(inv.getInventory());
 						} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
 							inv.cancelTasks();
 						}
@@ -311,10 +312,12 @@ public class FastInv implements InventoryHolder {
 			@EventHandler
 			public void onDisable(PluginDisableEvent e) {
 				if (e.getPlugin().equals(plugin)) {
-					Bukkit.getOnlinePlayers().stream()
-							.filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
-							.forEach(Player::closeInventory);
-				}
+                    for (Player p : Bukkit.getOnlinePlayers()) {
+                        if (p.getOpenInventory().getTopInventory().getHolder() instanceof  FastInv) {
+                            p.closeInventory();
+                        }
+                    }
+                }
 			}
 		};
 	}

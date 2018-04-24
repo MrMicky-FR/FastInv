@@ -25,7 +25,7 @@ inv.addItem(22, new ItemStack(Material.NAME_TAG), e -> inv.addItem(new ItemStack
 
 If you want to prevent the players to close inventory just cancel the FastInvCloseEvent:
 ```java
-inv.onClose(event -> event.setCancelled(true));
+inv.onClose(e -> e.setCancelled(true));
 ```
 
 If you don't want to cancel the InventoryClickEvent when a player click just do this:
