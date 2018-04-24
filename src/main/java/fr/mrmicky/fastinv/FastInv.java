@@ -312,12 +312,12 @@ public class FastInv implements InventoryHolder {
 			@EventHandler
 			public void onDisable(PluginDisableEvent e) {
 				if (e.getPlugin().equals(plugin)) {
-                    for (Player p : Bukkit.getOnlinePlayers()) {
-                        if (p.getOpenInventory().getTopInventory().getHolder() instanceof  FastInv) {
-                            p.closeInventory();
-                        }
-                    }
-                }
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						if (p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv) {
+							p.closeInventory();
+						}
+					}
+				}
 			}
 		};
 	}
