@@ -5,6 +5,8 @@ Works with all Bukkit versions from 1.7.10 to 1.12.2.
 
 You need Java 8
 
+FastInv also come with a optional [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+), so you can quickly create ItemStack
+
 ## How to use
 Using FastInv is really easy, just add the [FastInv class](src/main/java/fr/mrmicky/fastinv/FastInv.java) in your projet and add `FastInv.init(this);` in the `onEnable` of your plugin like this:
 ```java
