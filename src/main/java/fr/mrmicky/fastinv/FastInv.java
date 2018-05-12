@@ -31,6 +31,12 @@ public class FastInv implements InventoryHolder {
 
 	private static Plugin plugin = null;
 
+	/**
+	 * Register FastInv listeners
+	 * 
+	 * @param plugin
+	 *            The plugin who use FastInv
+	 */
 	public static void init(Plugin plugin) {
 		if (FastInv.plugin == null) {
 			FastInv.plugin = plugin;
@@ -38,7 +44,7 @@ public class FastInv implements InventoryHolder {
 		}
 	}
 
-	private Inventory inv;
+	private Inventory inventory;
 	private boolean cancelTasksOnClose = true;
 	private Set<FastInvCloseListener> closeListeners = new HashSet<>();
 	private Set<FastInvClickListener> clickListeners = new HashSet<>();
@@ -52,7 +58,7 @@ public class FastInv implements InventoryHolder {
 	 *            The size of the inventory
 	 */
 	public FastInv(int size) {
-		this(size, "FastInv");
+		this(size, InventoryType.CHEST.getDefaultTitle());
 	}
 
 	/**
@@ -74,7 +80,7 @@ public class FastInv implements InventoryHolder {
 	 *            The type of the inventory
 	 */
 	public FastInv(InventoryType type) {
-		this(type, "FastInv");
+		this(type, type.getDefaultTitle());
 	}
 
 	/**
@@ -91,9 +97,9 @@ public class FastInv implements InventoryHolder {
 
 	private FastInv(int size, InventoryType type, String title) {
 		if (type == InventoryType.CHEST && size > 0) {
-			inv = Bukkit.createInventory(this, size, title);
+			inventory = Bukkit.createInventory(this, size, title);
 		} else {
-			inv = Bukkit.createInventory(this, type, title);
+			inventory = Bukkit.createInventory(this, type, title);
 		}
 	}
 
@@ -102,7 +108,7 @@ public class FastInv implements InventoryHolder {
 	 *
 	 * @param item
 	 *            The item to add
-	 * @return the FastInv build
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(ItemStack item) {
 		return addItem(item, null);
@@ -116,10 +122,10 @@ public class FastInv implements InventoryHolder {
 	 *            The item to add
 	 * @param listener
 	 *            The {@link FastInvClickListener} for the item
-	 * @return the FastInv build
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(ItemStack item, FastInvClickListener listener) {
-		int slot = inv.firstEmpty();
+		int slot = inventory.firstEmpty();
 		if (slot > 0) {
 			return addItem(slot, item, listener);
 		}
@@ -133,7 +139,7 @@ public class FastInv implements InventoryHolder {
 	 *            The slot of the item
 	 * @param item
 	 *            The item to add
-	 * @return the FastInv build
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(int slot, ItemStack item) {
 		return addItem(slot, item, null);
@@ -149,10 +155,10 @@ public class FastInv implements InventoryHolder {
 	 *            The item to add
 	 * @param listener
 	 *            The {@link FastInvClickListener} for the item
-	 * @return the FastInv builder
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(int slot, ItemStack item, FastInvClickListener listener) {
-		inv.setItem(slot, item);
+		inventory.setItem(slot, item);
 		if (listener != null) {
 			itemListeners.put(slot, listener);
 		} else {
@@ -162,13 +168,13 @@ public class FastInv implements InventoryHolder {
 	}
 
 	/**
-	 * Add an item to the inventory on a multiples slots
+	 * Add an item to the inventory on multiples slots
 	 *
 	 * @param slots
 	 *            The slot of the item
 	 * @param item
 	 *            The item to add
-	 * @return the FastInv build
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(int[] slots, ItemStack item) {
 		return addItem(slots, item, null);
@@ -184,7 +190,7 @@ public class FastInv implements InventoryHolder {
 	 *            The item to add
 	 * @param listener
 	 *            The {@link FastInvClickListener} for the item
-	 * @return the FastInv builder
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv addItem(int[] slots, ItemStack item, FastInvClickListener listener) {
 		for (int slot : slots) {
@@ -217,10 +223,29 @@ public class FastInv implements InventoryHolder {
 		return this;
 	}
 
+	/**
+	 * Schdule a task to run
+	 * 
+	 * @param period
+	 * @param runnable
+	 *            The task to run
+	 * @return This FastInv, for chaining
+	 */
 	public FastInv onUpdate(long period, Runnable runnable) {
 		return onUpdate(period, period, runnable);
 	}
 
+	/**
+	 * Schdule a task to run with a delay before
+	 * 
+	 * @param delay
+	 *            Ticks to wait before running the task
+	 * @param period
+	 *            Delay in ticks between each runs
+	 * @param runnable
+	 *            The task to run
+	 * @return This FastInv, for chaining
+	 */
 	public FastInv onUpdate(long delay, long period, Runnable runnable) {
 		tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period));
 		return this;
@@ -231,12 +256,11 @@ public class FastInv implements InventoryHolder {
 	 *
 	 * @param players
 	 *            The players to open the menu
-	 * @return the FastInv builder
 	 */
 	public void open(Player... players) {
 		Bukkit.getScheduler().runTask(plugin, () -> {
 			for (Player p : players) {
-				p.openInventory(inv);
+				p.openInventory(inventory);
 			}
 		});
 	}
@@ -254,16 +278,21 @@ public class FastInv implements InventoryHolder {
 	 *
 	 * @param cancelTasksOnClose
 	 *            Set if the menu will destory
-	 * @return the FastInv builder
+	 * @return This FastInv, for chaining
 	 */
 	public FastInv setCancelTasksOnClose(boolean cancelTasksOnClose) {
 		this.cancelTasksOnClose = cancelTasksOnClose;
 		return this;
 	}
 
+	/**
+	 * Get the Bukkit inventory associated with this FastInv
+	 * 
+	 * @return The Bukkit inventory
+	 */
 	@Override
 	public Inventory getInventory() {
-		return inv;
+		return inventory;
 	}
 
 	private static Listener getListener() {
@@ -302,7 +331,7 @@ public class FastInv implements InventoryHolder {
 						// delay to prevent errors
 						if (ev.isCancelled() && p.isOnline()) {
 							p.openInventory(inv.getInventory());
-						} else if (e.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
+						} else if (inv.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
 							inv.cancelTasks();
 						}
 					});
