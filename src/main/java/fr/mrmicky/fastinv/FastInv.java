@@ -24,7 +24,7 @@ import org.bukkit.scheduler.BukkitTask;
  * A fast API to easely create advanced GUI
  *
  * @author MrMicky
- * @version 2.0.1
+ * @version 2.0.2
  * 
  */
 public class FastInv implements InventoryHolder {
