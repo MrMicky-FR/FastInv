@@ -116,7 +116,7 @@ public class FastInv implements InventoryHolder {
 
 	/**
 	 * Add an item to the inventory with a {@link FastInvClickListener} to
-	 * handle click
+	 * handle clicks
 	 *
 	 * @param item
 	 *            The item to add
@@ -147,7 +147,7 @@ public class FastInv implements InventoryHolder {
 
 	/**
 	 * Add an item to the inventory on specific slot with a
-	 * {@link FastInvClickListener} to handle click
+	 * {@link FastInvClickListener} to handle clicks
 	 *
 	 * @param slot
 	 *            The slot of the item
@@ -163,6 +163,38 @@ public class FastInv implements InventoryHolder {
 			itemListeners.put(slot, listener);
 		} else {
 			itemListeners.remove(slot);
+		}
+		return this;
+	}
+
+	/**
+	 * Add an item to the inventory on a range of slots
+	 *
+	 * @param slotsFrom
+	 * @param slotsTo
+	 * @param item
+	 *            The item to add
+	 * @return This FastInv, for chaining
+	 */
+	public FastInv addItem(int slotFrom, int slotTo, ItemStack item) {
+		return addItem(slotFrom, slotTo, item, null);
+	}
+
+	/**
+	 * Add an item to the inventory on a range of slots with a
+	 * {@link FastInvClickListener} to handle clicks
+	 *
+	 * @param slots
+	 *            The slots of the item
+	 * @param item
+	 *            The item to add
+	 * @param listener
+	 *            The {@link FastInvClickListener} for the item
+	 * @return This FastInv, for chaining
+	 */
+	public FastInv addItem(int slotFrom, int slotTo, ItemStack item, FastInvClickListener listener) {
+		for (int i = slotFrom; i <= slotTo; i++) {
+			addItem(i, item, listener);
 		}
 		return this;
 	}
@@ -351,33 +383,70 @@ public class FastInv implements InventoryHolder {
 		};
 	}
 
-	public static class FastInvClickEvent {
+	public static abstract class FastInvEvent {
 
 		private Player player;
 		private FastInv inventory;
+		private boolean cancelled;
+
+		public FastInvEvent(Player player, FastInv inventory, boolean cancelled) {
+			this.player = player;
+			this.inventory = inventory;
+			this.cancelled = cancelled;
+		}
+
+		/**
+		 * Get the player who clicked
+		 * 
+		 * @return the player who clicked
+		 */
+		public Player getPlayer() {
+			return player;
+		}
+
+		/**
+		 * Get the FastInv inventory
+		 * 
+		 * @return the fast inventory
+		 */
+		public FastInv getInventory() {
+			return inventory;
+		}
+
+		/**
+		 * Get if the event is cancelled or not
+		 * 
+		 * @return true if this event is cancelled
+		 */
+		public boolean isCancelled() {
+			return cancelled;
+		}
+
+		/**
+		 * Set if the event will be cancel or not
+		 * 
+		 * @param cancel
+		 *            true if you want to cancel the event
+		 */
+		public void setCancelled(boolean cancel) {
+			this.cancelled = cancel;
+		}
+	}
+
+	public static class FastInvClickEvent extends FastInvEvent {
+
 		private int slot;
 		private ItemStack item;
-		private boolean cancelled;
 		private InventoryAction action;
 		private ClickType clickType;
 
 		FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, boolean cancelled,
 				InventoryAction action, ClickType clickType) {
-			this.player = player;
-			this.inventory = inventory;
+			super(player, inventory, cancelled);
 			this.slot = slot;
 			this.item = item;
-			this.cancelled = cancelled;
 			this.action = action;
 			this.clickType = clickType;
-		}
-
-		public Player getPlayer() {
-			return this.player;
-		}
-
-		public FastInv getInventory() {
-			return this.inventory;
 		}
 
 		public int getSlot() {
@@ -386,14 +455,6 @@ public class FastInv implements InventoryHolder {
 
 		public ItemStack getItem() {
 			return this.item;
-		}
-
-		public boolean isCancelled() {
-			return this.cancelled;
-		}
-
-		public void setCancelled(boolean cancelled) {
-			this.cancelled = cancelled;
 		}
 
 		public InventoryAction getAction() {
@@ -405,32 +466,10 @@ public class FastInv implements InventoryHolder {
 		}
 	}
 
-	public static class FastInvCloseEvent {
-
-		private Player player;
-		private FastInv inventory;
-		private boolean cancelled;
+	public static class FastInvCloseEvent extends FastInvEvent {
 
 		FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
-			this.player = player;
-			this.inventory = inventory;
-			this.cancelled = cancelled;
-		}
-
-		public Player getPlayer() {
-			return this.player;
-		}
-
-		public FastInv getInventory() {
-			return this.inventory;
-		}
-
-		public boolean isCancelled() {
-			return this.cancelled;
-		}
-
-		public void setCancelled(boolean cancelled) {
-			this.cancelled = cancelled;
+			super(player, inventory, cancelled);
 		}
 	}
 
