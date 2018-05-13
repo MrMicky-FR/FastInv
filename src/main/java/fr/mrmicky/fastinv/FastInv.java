@@ -94,7 +94,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory.
+     * Add an {@link ItemStack} to the inventory.
      *
      * @param item The item to add
      * @return This FastInv instance, for chaining.
@@ -104,7 +104,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory with a {@link FastInvClickListener} to handle clicks.
+     * Add an {@link ItemStack} to the inventory with a {@link FastInvClickListener} to handle clicks.
      *
      * @param item     The item to add.
      * @param listener The {@link FastInvClickListener} for the item.
@@ -119,7 +119,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on a specific slot.
+     * Add an {@link ItemStack} to the inventory on a specific slot.
      *
      * @param slot The slot of the item.
      * @param item The item to add.
@@ -130,11 +130,11 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on specific slot with a {@link FastInvClickListener} to handle clicks.
+     * Add an {@link ItemStack} to the inventory on specific slot with a {@link FastInvClickListener} to handle clicks.
      *
      * @param slot     The slot of the item.
      * @param item     The item to add.
-     * @param listener The {@link FastInvClickListener} for the item.
+     * @param listener The FastInvClickListener for the item.
      * @return This FastInv instance, for chaining.
      */
     public FastInv addItem(int slot, ItemStack item, FastInvClickListener listener) {
@@ -150,7 +150,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on a range of slots.
+     * Add an {@link ItemStack} to the inventory on a range of slots.
      *
      * @param slotFrom Starting slot to put the item in.
      * @param slotTo   Ending slot to put the item in.
@@ -162,12 +162,12 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on a range of slots with a {@link FastInvClickListener} to handle clicks.
+     * Add an {@link ItemStack} to the inventory on a range of slots with a {@link FastInvClickListener} to handle clicks.
      *
      * @param slotFrom Starting slot to put the item in.
      * @param slotTo   Ending slot to put the item in.
      * @param item     The item to add.
-     * @param listener The {@link FastInvClickListener} for the item.
+     * @param listener The FastInvClickListener for the item.
      * @return This FastInv instance, for chaining.
      */
     public FastInv addItem(int slotFrom, int slotTo, ItemStack item, FastInvClickListener listener) {
@@ -178,7 +178,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on multiple slots.
+     * Add an {@link ItemStack} to the inventory on multiple slots.
      *
      * @param slots The slot of the item.
      * @param item  The item to add.
@@ -189,11 +189,11 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an item to the inventory on multiples slots with a {@link FastInvClickListener} to handle click.
+     * Add an {@link ItemStack} to the inventory on multiples slots with a {@link FastInvClickListener} to handle click.
      *
      * @param slots    The slots to place the item.
      * @param item     The item to add.
-     * @param listener The {@link FastInvClickListener} for the item.
+     * @param listener The FastInvClickListener for the item.
      * @return This FastInv instance, for chaining.
      */
     public FastInv addItem(int[] slots, ItemStack item, FastInvClickListener listener) {
@@ -361,7 +361,7 @@ public class FastInv implements InventoryHolder {
         }
 
         /**
-         * Get the player who clicked.
+         * Get the {@link Player} who clicked.
          *
          * @return the player who clicked.
          */
@@ -413,18 +413,38 @@ public class FastInv implements InventoryHolder {
             this.clickType = clickType;
         }
 
+        /**
+         * Get the number of the clicked slot
+         *
+         * @return The slot number
+         */
         public int getSlot() {
             return this.slot;
         }
 
+        /**
+         * Get the clicked {@link ItemStack}
+         *
+         * @return The clicked item
+         */
         public ItemStack getItem() {
             return this.item;
         }
 
+        /**
+         * Gets the {@link InventoryAction}
+         *
+         * @return The action of the event
+         */
         public InventoryAction getAction() {
             return this.action;
         }
 
+        /**
+         * Gets the {@link ClickType} of the event.
+         *
+         * @return The click type
+         */
         public ClickType getClickType() {
             return this.clickType;
         }
