@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class ExamplePlugin extends JavaPlugin {
 
-    private final Random RANDOM = new Random();
+    private final Random random = new Random();
 
     @Override
     public void onEnable() {
@@ -31,11 +31,11 @@ public class ExamplePlugin extends JavaPlugin {
             int[] color2 = new int[]{1, 3, 5, 7, 46, 48, 50, 52};
             FastInv inv = new FastInv(54, "Custom Menu");
 
-            int id = RANDOM.nextInt();
+            int id = random.nextInt();
 
             inv.addItem(22, new ItemStack(Material.NAME_TAG), itemClickEvent -> inv.addItem(new ItemBuilder(Material.OBSIDIAN).name("Hello!").build()))
-                    .onUpdate(20, () -> inv.addItem(color1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) RANDOM.nextInt(15))))
-                    .onUpdate(10, () -> inv.addItem(color2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) RANDOM.nextInt(15))))
+                    .onUpdate(20, () -> inv.addItem(color1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
+                    .onUpdate(10, () -> inv.addItem(color2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
                     .onClick(invClickEvent -> {
                         player.sendMessage("You clicked on slot " + invClickEvent.getSlot());
                         invClickEvent.setCancelled(true);
