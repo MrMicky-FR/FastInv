@@ -474,10 +474,10 @@ public class FastInv implements InventoryHolder {
 	}
 
 	public interface FastInvClickListener {
-		public void onClick(FastInvClickEvent event);
+		void onClick(FastInvClickEvent event);
 	}
 
 	public interface FastInvCloseListener {
-		public void onClose(FastInvCloseEvent event);
+		void onClose(FastInvCloseEvent event);
 	}
 }
