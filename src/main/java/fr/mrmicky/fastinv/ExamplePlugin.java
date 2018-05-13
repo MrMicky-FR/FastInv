@@ -33,7 +33,7 @@ public class ExamplePlugin extends JavaPlugin {
 
             int id = RANDOM.nextInt();
 
-            inv.addItem(22, new ItemStack(Material.NAME_TAG), itemClickEvent -> inv.addItem(new ItemStack(Material.OBSIDIAN)))
+            inv.addItem(22, new ItemStack(Material.NAME_TAG), itemClickEvent -> inv.addItem(new ItemBuilder(Material.OBSIDIAN).name("Hello!").build()))
                     .onUpdate(20, () -> inv.addItem(color1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) RANDOM.nextInt(15))))
                     .onUpdate(10, () -> inv.addItem(color2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) RANDOM.nextInt(15))))
                     .onClick(invClickEvent -> {
