@@ -313,7 +313,7 @@ public class FastInv implements InventoryHolder {
         }
 
         /**
-         * Get the FastInv inventory
+         * Get the FastInv inventory.
          *
          * @return This associated FastInv instance.
          */
