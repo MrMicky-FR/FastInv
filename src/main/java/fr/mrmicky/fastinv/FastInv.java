@@ -358,7 +358,7 @@ public class FastInv implements InventoryHolder {
                     inv.clickListeners.forEach(listener -> listener.onClick(clickEvent));
 
                     if (clickEvent.isCancelled()) {
-                        clickEvent.setCancelled(true);
+                        event.setCancelled(true);
                     }
                 }
             }
