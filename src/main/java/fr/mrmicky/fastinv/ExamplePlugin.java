@@ -14,7 +14,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * 
  * @author MrMicky
  */
-public class ExemplePlugin extends JavaPlugin {
+public class ExamplePlugin extends JavaPlugin {
 
 	private Random r = new Random();
 
