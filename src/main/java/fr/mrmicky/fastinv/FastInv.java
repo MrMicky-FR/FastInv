@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -41,7 +42,7 @@ public class FastInv implements InventoryHolder {
     private boolean cancelTasksOnClose = true;
     private Set<FastInvCloseListener> closeListeners = new HashSet<>();
     private Set<FastInvClickListener> clickListeners = new HashSet<>();
-    private HashMap<Integer, FastInvClickListener> itemListeners = new HashMap<>();
+    private Map<Integer, FastInvClickListener> itemListeners = new HashMap<>();
     private Set<BukkitTask> tasks = new HashSet<>();
 
     private Inventory inventory;
