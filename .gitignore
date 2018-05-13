@@ -1,10 +1,10 @@
 # Eclipse stuff
 .classpath
 .project
-.settings/
+.settings
 
 # netbeans
-nbproject/
+nbproject
 nbactions.xml
 
 # we use maven!
@@ -18,13 +18,13 @@ dependency-reduced-pom.xml
 .*.sw[a-p]
 
 # various other potential build files
-build/
-bin/
-dist/
+build
+bin
+dist
 manifest.mf
 
 # Mac filesystem dust
-.DS_Store/
+.DS_Store
 
 # intellij
 *.iml
