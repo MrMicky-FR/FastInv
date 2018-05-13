@@ -273,7 +273,7 @@ public class FastInv implements InventoryHolder {
     /**
      * Set if the tasks will be cancel on inventory close.
      *
-     * @param cancelTasksOnClose Set if the menu will destroy.
+     * @param cancelTasksOnClose Set if the tasks will be cancel
      * @return This FastInv instance, for chaining.
      */
     public FastInv setCancelTasksOnClose(boolean cancelTasksOnClose) {
@@ -289,55 +289,6 @@ public class FastInv implements InventoryHolder {
     @Override
     public Inventory getInventory() {
         return inventory;
-    }
-
-    public static abstract class FastInvEvent {
-
-        private Player player;
-        private FastInv inventory;
-        private boolean cancelled;
-
-        public FastInvEvent(Player player, FastInv inventory, boolean cancelled) {
-            this.player = player;
-            this.inventory = inventory;
-            this.cancelled = cancelled;
-        }
-
-        /**
-         * Get the player who clicked.
-         *
-         * @return the player who clicked.
-         */
-        public Player getPlayer() {
-            return player;
-        }
-
-        /**
-         * Get the FastInv inventory.
-         *
-         * @return This associated FastInv instance.
-         */
-        public FastInv getInventory() {
-            return inventory;
-        }
-
-        /**
-         * Get if the event is cancelled or not.
-         *
-         * @return Whether the event was cancelled.
-         */
-        public boolean isCancelled() {
-            return cancelled;
-        }
-
-        /**
-         * Set if the event will be cancel or not.
-         *
-         * @param cancel Whether the event should be cancelled.
-         */
-        public void setCancelled(boolean cancel) {
-            this.cancelled = cancel;
-        }
     }
 
     private static Listener getListener() {
@@ -395,6 +346,55 @@ public class FastInv implements InventoryHolder {
                 }
             }
         };
+    }
+
+    public static abstract class FastInvEvent {
+
+        private Player player;
+        private FastInv inventory;
+        private boolean cancelled;
+
+        FastInvEvent(Player player, FastInv inventory, boolean cancelled) {
+            this.player = player;
+            this.inventory = inventory;
+            this.cancelled = cancelled;
+        }
+
+        /**
+         * Get the player who clicked.
+         *
+         * @return the player who clicked.
+         */
+        public Player getPlayer() {
+            return player;
+        }
+
+        /**
+         * Get the FastInv inventory.
+         *
+         * @return This associated FastInv instance.
+         */
+        public FastInv getInventory() {
+            return inventory;
+        }
+
+        /**
+         * Get if the event is cancelled or not.
+         *
+         * @return Whether the event was cancelled.
+         */
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        /**
+         * Set if the event will be cancel or not.
+         *
+         * @param cancel Whether the event should be cancelled.
+         */
+        public void setCancelled(boolean cancel) {
+            this.cancelled = cancel;
+        }
     }
 
     public static class FastInvClickEvent extends FastInvEvent {
