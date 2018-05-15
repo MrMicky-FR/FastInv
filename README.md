@@ -51,7 +51,7 @@ inv.cancelTasks();
 You can get the FastInv object from a Bukkit inventory, just verify that its holder is an instance of FastInv and then cast it.
 ```java
 if (bukkitInv.getHolder() instanceof FastInv) {
-	FastInv fastInv = (FastInv) bukkitInv;
+	FastInv fastInv = (FastInv) bukkitInv.getHolder();
 	// Your code
 }
 ```
