@@ -17,8 +17,11 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author MrMicky
  * A complete {@link ItemStack} builder for FastInv (only works on 1.8+).
+ *
+ * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
+ *
+ * @author MrMicky
  */
 public class ItemBuilder {
 
