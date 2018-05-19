@@ -20,6 +20,8 @@ import java.util.Set;
 /**
  * A fast API to easily create advanced GUI.
  *
+ * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
+ *
  * @author MrMicky
  * @version 2.0.2
  */
