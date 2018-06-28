@@ -6,3 +6,5 @@ main: fr.mrmicky.fastinvexample.ExamplePlugin
 commands:
   testinv:
     description: Open an example GUI.
+  testinv2:
+    description: Open an other example GUI.

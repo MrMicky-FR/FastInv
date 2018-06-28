@@ -121,7 +121,7 @@ public class FastInv implements InventoryHolder {
      */
     public FastInv addItem(ItemStack item, FastInvClickListener listener) {
         int slot = inventory.firstEmpty();
-        if (slot > 0) {
+        if (slot >= 0) {
             return addItem(slot, item, listener);
         }
         return this;

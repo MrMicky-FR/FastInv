@@ -27,8 +27,14 @@ public class ExamplePlugin extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String alias, String[] args) {
-        if (sender instanceof Player) {
-            Player player = (Player) sender;
+        if (!(sender instanceof Player)) {
+            sender.sendMessage("Only player can do this command");
+            return true;
+        }
+
+        Player player = (Player) sender;
+
+        if (cmd.getName().equalsIgnoreCase("testinv")) {
             int[] color1 = new int[]{0, 2, 4, 6, 8, 45, 47, 49, 51, 53};
             int[] color2 = new int[]{1, 3, 5, 7, 46, 48, 50, 52};
             FastInv inv = new FastInv(54, "Custom Menu");
@@ -40,8 +46,10 @@ public class ExamplePlugin extends JavaPlugin {
                     .onUpdate(10, () -> inv.addItem(color2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
                     .onClick(e -> player.sendMessage("You clicked on slot " + e.getSlot()))
                     .onClose(e -> getLogger().warning("Inventory close"))
-                    .onUpdate(50, () -> getLogger().info("Update Inv: " + id))
+                    .onUpdate(100, () -> getLogger().info("Update Inv: " + id))
                     .open(player);
+        } else {
+            new ExempleFullClassInventory().open(player);
         }
         return true;
     }
