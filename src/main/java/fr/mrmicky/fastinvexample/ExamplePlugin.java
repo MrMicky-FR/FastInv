@@ -38,10 +38,7 @@ public class ExamplePlugin extends JavaPlugin {
             inv.addItem(22, new ItemStack(Material.NAME_TAG), itemClickEvent -> inv.addItem(new ItemBuilder(Material.OBSIDIAN).name("Hello!").build()))
                     .onUpdate(20, () -> inv.addItem(color1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
                     .onUpdate(10, () -> inv.addItem(color2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
-                    .onClick(invClickEvent -> {
-                        player.sendMessage("You clicked on slot " + invClickEvent.getSlot());
-                        invClickEvent.setCancelled(true);
-                    })
+                    .onClick(e -> player.sendMessage("You clicked on slot " + e.getSlot()))
                     .onClose(e -> getLogger().warning("Inventory close"))
                     .onUpdate(50, () -> getLogger().info("Update Inv: " + id))
                     .open(player);

@@ -23,7 +23,7 @@ import java.util.Set;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
- * @version 2.0.2
+ * @version 2.0.3 - Now supports async operations
  */
 public class FastInv implements InventoryHolder {
 
@@ -82,17 +82,24 @@ public class FastInv implements InventoryHolder {
      *
      * @param type  The type of the inventory.
      * @param title The title of the inventory.
+     * @throws IllegalStateException if FastInv is not init with FastInv.init(Plugin plugin)
      */
     public FastInv(InventoryType type, String title) {
         this(0, type, title);
     }
 
     private FastInv(int size, InventoryType type, String title) {
-        if (type == InventoryType.CHEST && size > 0) {
-            inventory = Bukkit.createInventory(this, size, title);
-        } else {
-            inventory = Bukkit.createInventory(this, type, title);
+        if (plugin == null) {
+            throw new IllegalStateException("FastInv is not initialised");
         }
+
+        runSync(() -> {
+            if (type == InventoryType.CHEST && size > 0) {
+                inventory = Bukkit.createInventory(this, size, title);
+            } else {
+                inventory = Bukkit.createInventory(this, type, title);
+            }
+        });
     }
 
     /**
@@ -140,13 +147,15 @@ public class FastInv implements InventoryHolder {
      * @return This FastInv instance, for chaining.
      */
     public FastInv addItem(int slot, ItemStack item, FastInvClickListener listener) {
-        inventory.setItem(slot, item);
+        runSync(() -> {
+            inventory.setItem(slot, item);
 
-        if (listener != null) {
-            itemListeners.put(slot, listener);
-        } else {
-            itemListeners.remove(slot);
-        }
+            if (listener != null) {
+                itemListeners.put(slot, listener);
+            } else {
+                itemListeners.remove(slot);
+            }
+        });
 
         return this;
     }
@@ -284,6 +293,19 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Run a task on the server primary thread.
+     *
+     * @param runnable The runnable to run on the main thread
+     */
+    public void runSync(Runnable runnable) {
+        if (Bukkit.isPrimaryThread()) {
+            runnable.run();
+        } else {
+            Bukkit.getScheduler().runTask(plugin, runnable);
+        }
+    }
+
+    /**
      * Get the Bukkit inventory associated with this FastInv instance.
      *
      * @return The Bukkit {@link Inventory}.
@@ -323,12 +345,12 @@ public class FastInv implements InventoryHolder {
                     Player player = (Player) event.getPlayer();
                     FastInv inv = (FastInv) event.getInventory().getHolder();
 
-                    FastInvCloseEvent clickEvent = new FastInvCloseEvent(player, inv, false);
-                    inv.closeListeners.forEach(listener -> listener.onClose(clickEvent));
+                    FastInvCloseEvent closeEvent = new FastInvCloseEvent(player, inv, false);
+                    inv.closeListeners.forEach(listener -> listener.onClose(closeEvent));
 
                     Bukkit.getScheduler().runTask(plugin, () -> {
                         // Tiny delay to prevent errors.
-                        if (clickEvent.isCancelled() && player.isOnline()) {
+                        if (closeEvent.isCancelled() && player.isOnline()) {
                             player.openInventory(inv.getInventory());
                         } else if (inv.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
                             inv.cancelTasks();
@@ -460,10 +482,10 @@ public class FastInv implements InventoryHolder {
     }
 
     public interface FastInvClickListener {
-        public void onClick(FastInvClickEvent event);
+        void onClick(FastInvClickEvent event);
     }
 
     public interface FastInvCloseListener {
-        public void onClose(FastInvCloseEvent event);
+        void onClose(FastInvCloseEvent event);
     }
 }
