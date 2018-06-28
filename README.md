@@ -28,6 +28,8 @@ inv.addItem(22, new ItemStack(Material.NAME_TAG), event -> inv.addItem(new ItemS
 	.open((Player) sender);
 ```
 
+Or if you prefer you can make a class that extends `FastInv` and do all operation in this class like [this example](src/main/java/fr/mrmicky/fastinvexample/ExempleFullClassInventory.java)
+
 If you want to prevent the players to close the inventory, cancel the FastInvCloseEvent:
 ```java
 inv.onClose(event -> event.setCancelled(true));
@@ -65,6 +67,7 @@ if (bukkitInv.getHolder() instanceof FastInv) {
 * Option to prevent player to close the inventory.
 * Supports multiple update tasks with configurable delay.
 * The Bukkit methods can still be use with a FastInv.
+* All methods are thread-safe.
 
 ## Version 2 Changelog
 * Replacing a listener per FastInv instance with a single listener.
