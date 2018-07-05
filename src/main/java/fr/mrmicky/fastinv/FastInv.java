@@ -263,6 +263,15 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Open the inventory to player.
+     *
+     * @param player The player to open the menu.
+     */
+    public void open(Player player) {
+        Bukkit.getScheduler().runTask(plugin, () -> player.openInventory(inventory));
+    }
+
+    /**
      * Open the inventory to player(s).
      *
      * @param players The player(s) to open the menu.
