@@ -19,7 +19,6 @@ import java.util.Set;
 
 /**
  * A fast API to easily create advanced GUI.
- *
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
@@ -263,7 +262,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Open the inventory to player.
+     * Open the inventory to a player.
      *
      * @param player The player to open the menu.
      */
@@ -272,9 +271,9 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Open the inventory to player(s).
+     * Open the inventory to players.
      *
-     * @param players The player(s) to open the menu.
+     * @param players The players to open the menu.
      */
     public void open(Player... players) {
         Bukkit.getScheduler().runTask(plugin, () -> {
@@ -439,8 +438,8 @@ public class FastInv implements InventoryHolder {
         private InventoryAction action;
         private ClickType clickType;
 
-        FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item,
-                          boolean cancelled, InventoryAction action, ClickType clickType) {
+        private FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item,
+                                  boolean cancelled, InventoryAction action, ClickType clickType) {
             super(player, inventory, cancelled);
             this.slot = slot;
             this.item = item;
@@ -486,8 +485,7 @@ public class FastInv implements InventoryHolder {
     }
 
     public static class FastInvCloseEvent extends FastInvEvent {
-
-        FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
+        private FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
             super(player, inventory, cancelled);
         }
     }

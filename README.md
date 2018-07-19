@@ -1,7 +1,7 @@
 # FastInv
 FastInv is a complete Bukkit API allowing you to easily create menus with clickable items all in one class and with useful features.
 
-Works with all Bukkit versions from 1.7.10 to 1.12.2.
+Works with all Bukkit versions from 1.7.10 to 1.13
 
 **Java 8 is a prerequisite for FastInv!**
 

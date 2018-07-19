@@ -35,8 +35,8 @@ public class ExamplePlugin extends JavaPlugin {
         Player player = (Player) sender;
 
         if (cmd.getName().equalsIgnoreCase("testinv")) {
-            int[] color1 = new int[]{0, 2, 4, 6, 8, 45, 47, 49, 51, 53};
-            int[] color2 = new int[]{1, 3, 5, 7, 46, 48, 50, 52};
+            int[] color1 = {0, 2, 4, 6, 8, 45, 47, 49, 51, 53};
+            int[] color2 = {1, 3, 5, 7, 46, 48, 50, 52};
             FastInv inv = new FastInv(54, "Custom Menu");
 
             int id = random.nextInt();
