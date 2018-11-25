@@ -15,10 +15,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * A complete {@link ItemStack} builder for FastInv (only works on 1.8+).
- *
+ * <p>
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
@@ -52,6 +53,24 @@ public class ItemBuilder {
         this.meta = item.getItemMeta();
     }
 
+    public int getAmount() {
+        return item.getAmount();
+    }
+
+    public ItemBuilder amount(int amount) {
+        item.setAmount(amount);
+        return this;
+    }
+
+    public int getDurability() {
+        return item.getDurability();
+    }
+
+    public ItemBuilder durability(short durability) {
+        item.setDurability(durability);
+        return this;
+    }
+
     /*
      * Meta:
      */
@@ -65,6 +84,14 @@ public class ItemBuilder {
 
     public ItemBuilder meta(ItemMeta meta) {
         this.meta = meta;
+        return this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
+        if (metaClass.isAssignableFrom(meta.getClass())) {
+            metaConsumer.accept((T) meta);
+        }
         return this;
     }
 
@@ -121,6 +148,10 @@ public class ItemBuilder {
 
     public Map<Enchantment, Integer> getEnchants() {
         return meta.getEnchants();
+    }
+
+    public ItemBuilder enchant(Enchantment enchantment) {
+        return enchant(enchantment, 1);
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
