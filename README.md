@@ -1,9 +1,9 @@
 # FastInv
-FastInv is a complete Bukkit API allowing you to easily create menus with clickable items all in one class and with useful features.
+Light and easy inventory management library for Bukkit plugins
 
 Works with all Bukkit versions from 1.7.10 to 1.13
 
-**Java 8 is a prerequisite for FastInv!**
+Java 8 is a prerequisite for FastInv !
 
 FastInv also come with a optional [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+) so you can quickly create ItemStack.
 
@@ -68,6 +68,9 @@ if (bukkitInv.getHolder() instanceof FastInv) {
 * Supports multiple update tasks with configurable delay.
 * The Bukkit methods can still be use with a FastInv.
 * All methods are thread-safe.
+
+## Version 2.1 Changelog
+* Replace `FastInvClickListener` with `Consumer<FastInvClickEvent>` and `FastInvCloseListener` with `Consumer<FastInvCloseEvent>`
 
 ## Version 2 Changelog
 * Replacing a listener per FastInv instance with a single listener.
