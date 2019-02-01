@@ -18,19 +18,20 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * A complete {@link ItemStack} builder for FastInv (only works on 1.8+).
+ * A complete {@link ItemStack} builder (only works on 1.8+).
  * <p>
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
  */
+@SuppressWarnings("deprecation")
 public class ItemBuilder {
 
     private ItemStack item;
     private ItemMeta meta;
 
     /*
-     * Constructors:
+     * Constructors
      */
     public ItemBuilder(Material material) {
         this(new ItemStack(material));
@@ -72,7 +73,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Meta:
+     * Meta
      */
     public boolean hasMeta() {
         return getMeta() != null;
@@ -96,7 +97,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Name:
+     * Name
      */
     public boolean hasName() {
         return meta.hasDisplayName();
@@ -112,7 +113,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Lore:
+     * Lore
      */
     public boolean hasLore() {
         return meta.hasLore();
@@ -132,7 +133,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Enchantments:
+     * Enchantments
      */
     public boolean hasEnchants() {
         return meta.hasEnchants();
@@ -165,7 +166,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Flags:
+     * Flags
      */
     public boolean hasFlag(ItemFlag flag) {
         return meta.hasItemFlag(flag);
@@ -186,7 +187,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Unbreakability:
+     * Unbreakability
      */
     public boolean isUnbreakable() {
         return meta.spigot().isUnbreakable();
@@ -196,22 +197,19 @@ public class ItemBuilder {
         return unbreakable(true);
     }
 
-    @SuppressWarnings("deprecation")
     public ItemBuilder unbreakable(boolean unbreakable) {
         meta.spigot().setUnbreakable(unbreakable);
         return this;
     }
 
     /*
-     * ==========================
      *
      * SPECIFIC META
      *
-     * ==========================
      */
 
     /*
-     * Banners:
+     * Banners
      */
     public DyeColor getBannerBaseColor() {
         return ((BannerMeta) meta).getBaseColor();
@@ -248,7 +246,7 @@ public class ItemBuilder {
     }
 
     /*
-     * Leather armor:
+     * Leather armor
      */
     public Color getLeatherArmorColor() {
         return ((LeatherArmorMeta) meta).getColor();
@@ -260,25 +258,23 @@ public class ItemBuilder {
     }
 
     /*
-     * Skulls:
+     * Skulls
      */
     public boolean hasSkullOwner() {
         return ((SkullMeta) meta).hasOwner();
     }
 
-    @SuppressWarnings("deprecation")
     public String getSkullOwner() {
         return ((SkullMeta) meta).getOwner();
     }
 
-    @SuppressWarnings("deprecation")
     public ItemBuilder skullOwner(String owner) {
         ((SkullMeta) meta).setOwner(owner);
         return this;
     }
 
     /*
-     * Potions:
+     * Potions
      */
     public boolean hasPotionEffect(PotionEffectType type) {
         return ((PotionMeta) meta).hasCustomEffect(type);
@@ -297,8 +293,8 @@ public class ItemBuilder {
         return this;
     }
 
-    /*
-     * Build the ItemStack.
+    /**
+     * Build the ItemStack
      */
     public ItemStack build() {
         item.setItemMeta(meta);

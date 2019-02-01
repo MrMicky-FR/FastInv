@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
- * @version 2.1.0
+ * @version 2.1.1
  */
 public class FastInv implements InventoryHolder {
 
