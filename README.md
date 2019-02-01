@@ -25,7 +25,26 @@ public void onEnable() {
 }
 ```
 
-Now you can create new FastInv instances and add items. Below you can see a quick example of an animated inventory:
+Now you can create a class that extends `FastInv` like this
+```java
+public class ExempleFullClassInventory extends FastInv {
+
+    private Random random = new Random();
+
+    public ExempleFullClassInventory() {
+        super(27, "Exemple with FastInv");
+
+        addItem(0, 26, new ItemStack(Material.STAINED_GLASS_PANE), e -> e.getItem().setDurability((short) random.nextInt(16)));
+    }
+}
+```
+
+And just call the open method for open it
+```java
+new ExempleFullClassInventory().open(player);
+```
+
+Or if you prefer you can just create a new FastInv like this
 ```java
 Random random = new Random();
 FastInv inv = new FastInv(54, "Custom Menu");
@@ -34,8 +53,6 @@ inv.addItem(22, new ItemStack(Material.NAME_TAG), event -> inv.addItem(new ItemS
 	.onUpdate(10, () -> inv.addItem(int2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
 	.open((Player) sender);
 ```
-
-Or if you prefer you can make a class that extends `FastInv` and do all operation in this class like [this example](src/main/java/fr/mrmicky/fastinvexample/ExempleFullClassInventory.java)
 
 If you want to prevent the players to close the inventory, cancel the FastInvCloseEvent:
 ```java

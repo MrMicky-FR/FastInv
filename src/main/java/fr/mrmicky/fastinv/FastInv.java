@@ -2,6 +2,7 @@ package fr.mrmicky.fastinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
@@ -34,16 +35,16 @@ public class FastInv implements InventoryHolder {
      */
     public static void init(Plugin plugin) {
         if (FastInv.plugin == null) {
-            FastInv.plugin = plugin;
+            FastInv.plugin = Objects.requireNonNull(plugin, "plugin");
             Bukkit.getPluginManager().registerEvents(createListener(), plugin);
         }
     }
 
     private boolean cancelTasksOnClose = true;
+    private Set<BukkitTask> tasks = new HashSet<>();
     private Set<Consumer<FastInvCloseEvent>> closeHandlers = new HashSet<>();
     private Set<Consumer<FastInvClickEvent>> clickHandlers = new HashSet<>();
     private Map<Integer, Consumer<FastInvClickEvent>> itemHandlers = new HashMap<>();
-    private Set<BukkitTask> tasks = new HashSet<>();
 
     private Inventory inventory;
 
@@ -113,7 +114,7 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory with a click handler
      *
-     * @param item     The item to add.
+     * @param item    The item to add.
      * @param handler The the click handler for the item.
      * @return This FastInv instance, for chaining.
      */
@@ -141,8 +142,8 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on specific slot with a click handler
      *
-     * @param slot     The slot of the item.
-     * @param item     The item to add.
+     * @param slot    The slot of the item.
+     * @param item    The item to add.
      * @param handler The the click handler for the item.
      * @return This FastInv instance, for chaining.
      */
@@ -178,7 +179,7 @@ public class FastInv implements InventoryHolder {
      * @param slotFrom Starting slot to put the item in.
      * @param slotTo   Ending slot to put the item in.
      * @param item     The item to add.
-     * @param handler The the click handler for the item.
+     * @param handler  The the click handler for the item.
      * @return This FastInv instance, for chaining.
      */
     public FastInv addItem(int slotFrom, int slotTo, ItemStack item, Consumer<FastInvClickEvent> handler) {
@@ -202,8 +203,8 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on multiples slots with a click handler
      *
-     * @param slots    The slots to place the item.
-     * @param item     The item to add.
+     * @param slots   The slots to place the item.
+     * @param item    The item to add.
      * @param handler The the click handler for the item.
      * @return This FastInv instance, for chaining.
      */
@@ -284,7 +285,6 @@ public class FastInv implements InventoryHolder {
      */
     public int[] getBorders() {
         int size = inventory.getSize();
-
         return IntStream.range(0, size).filter(i -> size < 27 || i < 9 || i % 9 == 0 || (i - 8) % 9 == 0 || i > size - 9).toArray();
     }
 
@@ -379,7 +379,7 @@ public class FastInv implements InventoryHolder {
         };
     }
 
-    public static abstract class FastInvEvent {
+    public static abstract class FastInvEvent implements Cancellable {
 
         private Player player;
         private FastInv inventory;
@@ -414,6 +414,7 @@ public class FastInv implements InventoryHolder {
          *
          * @return Whether the event was cancelled.
          */
+        @Override
         public boolean isCancelled() {
             return cancelled;
         }
@@ -423,6 +424,7 @@ public class FastInv implements InventoryHolder {
          *
          * @param cancel Whether the event should be cancelled.
          */
+        @Override
         public void setCancelled(boolean cancel) {
             this.cancelled = cancel;
         }
