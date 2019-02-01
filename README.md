@@ -1,13 +1,20 @@
 # FastInv
 Light and easy inventory management library for Bukkit plugins
 
-Works with all Bukkit versions from 1.7.10 to 1.13
+Works with all versions from 1.7 to 1.13 !
 
-Java 8 is a prerequisite for FastInv !
+FastInv also come with a [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+) so you can quickly create ItemStack.
 
-FastInv also come with a optional [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+) so you can quickly create ItemStack.
-
-You can find the JavaDoc [here](https://mrmicky.fr/fastinv/)
+## Features
+* The API is in a single small class (less than 500 lines with the doc).
+* Custom inventory (size, title and type).
+* Items with custom ClickEvent.
+* Easy to use.
+* Update task with configurable delay.
+* Option to prevent player to close the inventory.
+* Supports multiple update tasks with configurable delay.
+* The Bukkit methods can still be use with a FastInv.
+* All methods are thread-safe.
 
 ## How to use
 Using FastInv is really easy. Start with adding the [FastInv](src/main/java/fr/mrmicky/fastinv/FastInv.java) class to your project. Then add `FastInv.init(this);` in your `onEnable` method of your plugin like this:
@@ -58,21 +65,11 @@ if (bukkitInv.getHolder() instanceof FastInv) {
 }
 ```
 
-## Features
-* The API is in a single small class (less than 500 lines with the doc).
-* Custom inventory (size, title and type).
-* Items with custom ClickEvent.
-* Easy to use.
-* Update task with configurable delay.
-* Option to prevent player to close the inventory.
-* Supports multiple update tasks with configurable delay.
-* The Bukkit methods can still be use with a FastInv.
-* All methods are thread-safe.
-
-## Version 2.1 Changelog
+## Changelog
+### Version 2.1
 * Replace `FastInvClickListener` with `Consumer<FastInvClickEvent>` and `FastInvCloseListener` with `Consumer<FastInvCloseEvent>`
 
-## Version 2 Changelog
+### Version 2
 * Replacing a listener per FastInv instance with a single listener.
 * With this, inventories no longer need to be destroyed, only tasks will be cancel.
 * Replace `setWillDestroy(destroy)` with `setCancelTasksOnClose(cancelTasksOnClose)`, and `destroy()` with `cancelTasks()`.
