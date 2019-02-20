@@ -1,7 +1,7 @@
 # FastInv
-Light and easy inventory management library for Bukkit plugins
+[![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
-Works with all versions from 1.7 to 1.13 !
+Small and easy inventory API with 1.7 to 1.13.2 support for Bukkit plugins !
 
 FastInv also come with a [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+) so you can quickly create ItemStack.
 
