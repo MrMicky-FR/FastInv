@@ -1,13 +1,15 @@
 # Eclipse
 .classpath
 .project
+.metadata
 .settings/
 
 # IntelliJ
 .idea/
+.idea_modules/
 *.iml
 *.iws
-out
+/out/
 
 # Mac
 .DS_Store
