@@ -1,154 +1,56 @@
 package fr.mrmicky.fastinv;
 
 import org.bukkit.Color;
-import org.bukkit.DyeColor;
 import org.bukkit.Material;
-import org.bukkit.block.banner.Pattern;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.*;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * A complete {@link ItemStack} builder (only works on 1.8+).
- * <p>
- * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
+ * Simple builder to create {@link ItemStack}
  *
  * @author MrMicky
  */
-@SuppressWarnings("deprecation")
 public class ItemBuilder {
 
     private ItemStack item;
     private ItemMeta meta;
 
-    /*
-     * Constructors
-     */
     public ItemBuilder(Material material) {
         this(new ItemStack(material));
     }
 
-    public ItemBuilder(Material material, int amount) {
-        this(new ItemStack(material, amount));
-    }
-
-    public ItemBuilder(Material material, byte data) {
-        this(new ItemStack(material, 1, data));
-    }
-
-    public ItemBuilder(Material material, int amount, byte data) {
-        this(new ItemStack(material, amount, data));
-    }
-
     public ItemBuilder(ItemStack item) {
-        this.item = item;
-        this.meta = item.getItemMeta();
+        this.item = Objects.requireNonNull(item, "item");
+        meta = item.getItemMeta();
     }
 
-    public int getAmount() {
-        return item.getAmount();
+    public ItemBuilder type(Material material) {
+        item.setType(material);
+        return this;
+    }
+
+    public ItemBuilder data(int data) {
+        return durability((short) data);
+    }
+
+    public ItemBuilder durability(short durability) {
+        //noinspection deprecation - legacy support
+        item.setDurability(durability);
+        return this;
     }
 
     public ItemBuilder amount(int amount) {
         item.setAmount(amount);
         return this;
-    }
-
-    public int getDurability() {
-        return item.getDurability();
-    }
-
-    public ItemBuilder durability(short durability) {
-        item.setDurability(durability);
-        return this;
-    }
-
-    /*
-     * Meta
-     */
-    public boolean hasMeta() {
-        return getMeta() != null;
-    }
-
-    public ItemMeta getMeta() {
-        return meta;
-    }
-
-    public ItemBuilder meta(ItemMeta meta) {
-        this.meta = meta;
-        return this;
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
-        if (metaClass.isAssignableFrom(meta.getClass())) {
-            metaConsumer.accept((T) meta);
-        }
-        return this;
-    }
-
-    /*
-     * Name
-     */
-    public boolean hasName() {
-        return meta.hasDisplayName();
-    }
-
-    public String getName() {
-        return meta.getDisplayName();
-    }
-
-    public ItemBuilder name(String name) {
-        meta.setDisplayName(name);
-        return this;
-    }
-
-    /*
-     * Lore
-     */
-    public boolean hasLore() {
-        return meta.hasLore();
-    }
-
-    public List<String> getLore() {
-        return meta.getLore();
-    }
-
-    public ItemBuilder lore(String... lore) {
-        return lore(Arrays.asList(lore));
-    }
-
-    public ItemBuilder lore(List<String> lore) {
-        meta.setLore(lore);
-        return this;
-    }
-
-    /*
-     * Enchantments
-     */
-    public boolean hasEnchants() {
-        return meta.hasEnchants();
-    }
-
-    public boolean hasEnchant(Enchantment enchantment) {
-        return meta.hasEnchant(enchantment);
-    }
-
-    public boolean hasConflictingEnchant(Enchantment enchantment) {
-        return meta.hasConflictingEnchant(enchantment);
-    }
-
-    public Map<Enchantment, Integer> getEnchants() {
-        return meta.getEnchants();
     }
 
     public ItemBuilder enchant(Enchantment enchantment) {
@@ -165,20 +67,75 @@ public class ItemBuilder {
         return this;
     }
 
-    /*
-     * Flags
-     */
-    public boolean hasFlag(ItemFlag flag) {
-        return meta.hasItemFlag(flag);
+    public ItemBuilder removeEnchants() {
+        meta.getEnchants().keySet().forEach(meta::removeEnchant);
+        return this;
     }
 
-    public Set<ItemFlag> getFlags() {
-        return meta.getItemFlags();
+    public ItemBuilder meta(Consumer<ItemMeta> metaConsumer) {
+        metaConsumer.accept(meta);
+        return this;
     }
 
-    public ItemBuilder addFlags(ItemFlag... flags) {
+    @SuppressWarnings("unchecked")
+    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
+        if (metaClass.isAssignableFrom(meta.getClass())) {
+            metaConsumer.accept((T) meta);
+        }
+        return this;
+    }
+
+    public ItemBuilder name(String name) {
+        meta.setDisplayName(name);
+        return this;
+    }
+
+    public ItemBuilder lore(String lore) {
+        return lore(Collections.singletonList(lore));
+    }
+
+    public ItemBuilder lore(String... lore) {
+        return lore(Arrays.asList(lore));
+    }
+
+    public ItemBuilder lore(List<String> lore) {
+        meta.setLore(lore);
+        return this;
+    }
+
+    public ItemBuilder addLore(String line) {
+        List<String> lore = meta.getLore();
+
+        if (lore == null) {
+            return lore(Collections.singletonList(line));
+        }
+
+        lore.add(line);
+        return lore(lore);
+    }
+
+    public ItemBuilder addLore(String... lines) {
+        return addLore(Arrays.asList(lines));
+    }
+
+    public ItemBuilder addLore(List<String> lines) {
+        List<String> lore = meta.getLore();
+
+        if (lore == null) {
+            return lore(lines);
+        }
+
+        lore.addAll(lines);
+        return lore(lore);
+    }
+
+    public ItemBuilder flags(ItemFlag... flags) {
         meta.addItemFlags(flags);
         return this;
+    }
+
+    public ItemBuilder flags() {
+        return flags(ItemFlag.values());
     }
 
     public ItemBuilder removeFlags(ItemFlag... flags) {
@@ -186,11 +143,8 @@ public class ItemBuilder {
         return this;
     }
 
-    /*
-     * Unbreakability
-     */
-    public boolean isUnbreakable() {
-        return meta.spigot().isUnbreakable();
+    public ItemBuilder removeFlags() {
+        return removeFlags(ItemFlag.values());
     }
 
     public ItemBuilder unbreakable() {
@@ -198,104 +152,15 @@ public class ItemBuilder {
     }
 
     public ItemBuilder unbreakable(boolean unbreakable) {
+        //noinspection deprecation - legacy support
         meta.spigot().setUnbreakable(unbreakable);
         return this;
     }
 
-    /*
-     *
-     * SPECIFIC META
-     *
-     */
-
-    /*
-     * Banners
-     */
-    public DyeColor getBannerBaseColor() {
-        return ((BannerMeta) meta).getBaseColor();
+    public ItemBuilder armorColor(Color color) {
+        return meta(LeatherArmorMeta.class, armorMeta -> armorMeta.setColor(color));
     }
 
-    public List<Pattern> getBannerPatterns() {
-        return ((BannerMeta) meta).getPatterns();
-    }
-
-    @SuppressWarnings("deprecation")
-    public ItemBuilder bannerBaseColor(DyeColor color) {
-        ((BannerMeta) meta).setBaseColor(color);
-        return this;
-    }
-
-    public ItemBuilder bannerPatterns(List<Pattern> patterns) {
-        ((BannerMeta) meta).setPatterns(patterns);
-        return this;
-    }
-
-    public ItemBuilder bannerPattern(int i, Pattern pattern) {
-        ((BannerMeta) meta).setPattern(i, pattern);
-        return this;
-    }
-
-    public ItemBuilder addBannerPatterns(Pattern pattern) {
-        ((BannerMeta) meta).addPattern(pattern);
-        return this;
-    }
-
-    public ItemBuilder removeBannerPattern(int i) {
-        ((BannerMeta) meta).removePattern(i);
-        return this;
-    }
-
-    /*
-     * Leather armor
-     */
-    public Color getLeatherArmorColor() {
-        return ((LeatherArmorMeta) meta).getColor();
-    }
-
-    public ItemBuilder leatherArmorColor(Color color) {
-        ((LeatherArmorMeta) meta).setColor(color);
-        return this;
-    }
-
-    /*
-     * Skulls
-     */
-    public boolean hasSkullOwner() {
-        return ((SkullMeta) meta).hasOwner();
-    }
-
-    public String getSkullOwner() {
-        return ((SkullMeta) meta).getOwner();
-    }
-
-    public ItemBuilder skullOwner(String owner) {
-        ((SkullMeta) meta).setOwner(owner);
-        return this;
-    }
-
-    /*
-     * Potions
-     */
-    public boolean hasPotionEffect(PotionEffectType type) {
-        return ((PotionMeta) meta).hasCustomEffect(type);
-    }
-
-    public boolean hasPotionEffects() {
-        return ((PotionMeta) meta).hasCustomEffects();
-    }
-
-    public List<PotionEffect> getPotionEffects() {
-        return ((PotionMeta) meta).getCustomEffects();
-    }
-
-    public ItemBuilder addPotionEffect(PotionEffect effect, boolean overwrite) {
-        ((PotionMeta) meta).addCustomEffect(effect, overwrite);
-        return this;
-    }
-
-    /**
-     * Build the ItemStack
-     */
     public ItemStack build() {
         item.setItemMeta(meta);
         return item;

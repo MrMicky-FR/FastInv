@@ -6,11 +6,11 @@
 
     <groupId>fr.mrmicky</groupId>
     <artifactId>fastinv</artifactId>
-    <version>2.1.1</version>
+    <version>3.0.0-SNAPSHOT</version>
 
     <name>FastInv</name>
     <url>https://github.com/MrMicky-FR/FastInv</url>
-    <description>Light and easy inventory management library for Bukkit plugins</description>
+    <description>Small and easy Bukkit inventory API with 1.7 to 1.13.2 support</description>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -2,49 +2,38 @@ package fr.mrmicky.fastinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
-import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
- * A fast API to easily create advanced GUI.
+ * Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
- * @version 2.1.1
+ * @version 3.0
  */
 public class FastInv implements InventoryHolder {
 
-    private static Plugin plugin = null;
+    private Predicate<Player> closeFilter;
 
-    /**
-     * Register your FastInv instance.
-     *
-     * @param plugin The plugin that uses FastInv.
-     */
-    public static void init(Plugin plugin) {
-        if (FastInv.plugin == null) {
-            FastInv.plugin = Objects.requireNonNull(plugin, "plugin");
-            Bukkit.getPluginManager().registerEvents(createListener(), plugin);
-        }
-    }
-
-    private boolean cancelTasksOnClose = true;
-    private Set<BukkitTask> tasks = new HashSet<>();
-    private Set<Consumer<FastInvCloseEvent>> closeHandlers = new HashSet<>();
-    private Set<Consumer<FastInvClickEvent>> clickHandlers = new HashSet<>();
-    private Map<Integer, Consumer<FastInvClickEvent>> itemHandlers = new HashMap<>();
+    private Set<Consumer<InventoryOpenEvent>> openHandlers;
+    private Set<Consumer<InventoryCloseEvent>> closeHandlers;
+    private Set<Consumer<InventoryClickEvent>> clickHandlers;
+    private Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
 
     private Inventory inventory;
 
@@ -81,184 +70,190 @@ public class FastInv implements InventoryHolder {
      *
      * @param type  The type of the inventory.
      * @param title The title of the inventory.
-     * @throws IllegalStateException if FastInv is not init with FastInv.init(Plugin plugin)
      */
     public FastInv(InventoryType type, String title) {
         this(0, type, title);
     }
 
     private FastInv(int size, InventoryType type, String title) {
-        if (plugin == null) {
-            throw new IllegalStateException("FastInv is not initialised");
+        if (type == InventoryType.CHEST && size > 0) {
+            inventory = Bukkit.createInventory(this, size, title);
+        } else {
+            inventory = Bukkit.createInventory(this, Objects.requireNonNull(type, "type"), title);
         }
+    }
 
-        runSync(() -> {
-            if (type == InventoryType.CHEST && size > 0) {
-                inventory = Bukkit.createInventory(this, size, title);
-            } else {
-                inventory = Bukkit.createInventory(this, type, title);
-            }
-        });
+    protected void onOpen(InventoryOpenEvent event) {
+    }
+
+    protected void onClick(InventoryClickEvent event) {
+    }
+
+    protected void onClose(InventoryCloseEvent event) {
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory.
+     * Add an {@link ItemStack} to the inventory on the first empty slot.
      *
-     * @param item The item to add
-     * @return This FastInv instance, for chaining.
+     * @param item The ItemStack to add
      */
-    public FastInv addItem(ItemStack item) {
-        return addItem(item, null);
+    public void addItem(ItemStack item) {
+        addItem(item, null);
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory with a click handler
+     * Add an {@link ItemStack} to the inventory on the first empty slot with a click handler.
      *
      * @param item    The item to add.
      * @param handler The the click handler for the item.
-     * @return This FastInv instance, for chaining.
      */
-    public FastInv addItem(ItemStack item, Consumer<FastInvClickEvent> handler) {
-        runSync(() -> {
-            int slot = inventory.firstEmpty();
-            if (slot >= 0) {
-                addItem(slot, item, handler);
-            }
-        });
-        return this;
+    public void addItem(ItemStack item, Consumer<InventoryClickEvent> handler) {
+        int slot = inventory.firstEmpty();
+        if (slot >= 0) {
+            setItem(slot, item, handler);
+        }
     }
 
     /**
      * Add an {@link ItemStack} to the inventory on a specific slot.
      *
-     * @param slot The slot of the item.
+     * @param slot The slot where to add the item.
      * @param item The item to add.
-     * @return This FastInv instance, for chaining.
      */
-    public FastInv addItem(int slot, ItemStack item) {
-        return addItem(slot, item, null);
+    public void setItem(int slot, ItemStack item) {
+        setItem(slot, item, null);
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on specific slot with a click handler
+     * Add an {@link ItemStack} to the inventory on specific slot with a click handler.
      *
-     * @param slot    The slot of the item.
+     * @param slot    The slot where to add the item.
      * @param item    The item to add.
-     * @param handler The the click handler for the item.
-     * @return This FastInv instance, for chaining.
+     * @param handler The click handler for the item
      */
-    public FastInv addItem(int slot, ItemStack item, Consumer<FastInvClickEvent> handler) {
-        runSync(() -> {
-            inventory.setItem(slot, item);
+    public void setItem(int slot, ItemStack item, Consumer<InventoryClickEvent> handler) {
+        inventory.setItem(slot, item);
 
-            if (handler != null) {
-                itemHandlers.put(slot, handler);
-            } else {
-                itemHandlers.remove(slot);
-            }
-        });
-
-        return this;
+        if (handler != null) {
+            itemHandlers.put(slot, handler);
+        } else {
+            itemHandlers.remove(slot);
+        }
     }
 
     /**
      * Add an {@link ItemStack} to the inventory on a range of slots.
      *
-     * @param slotFrom Starting slot to put the item in.
-     * @param slotTo   Ending slot to put the item in.
+     * @param slotFrom Starting slot to add the item in.
+     * @param slotTo   Ending slot to add the item in.
      * @param item     The item to add.
-     * @return This FastInv instance, for chaining.
      */
-    public FastInv addItem(int slotFrom, int slotTo, ItemStack item) {
-        return addItem(slotFrom, slotTo, item, null);
+    public void setItems(int slotFrom, int slotTo, ItemStack item) {
+        setItems(slotFrom, slotTo, item, null);
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on a range of slots with a click handler
+     * Add an {@link ItemStack} to the inventory on a range of slots with a click handler.
      *
      * @param slotFrom Starting slot to put the item in.
      * @param slotTo   Ending slot to put the item in.
      * @param item     The item to add.
-     * @param handler  The the click handler for the item.
-     * @return This FastInv instance, for chaining.
+     * @param handler  The click handler for the item
      */
-    public FastInv addItem(int slotFrom, int slotTo, ItemStack item, Consumer<FastInvClickEvent> handler) {
+    public void setItems(int slotFrom, int slotTo, ItemStack item, Consumer<InventoryClickEvent> handler) {
         for (int i = slotFrom; i <= slotTo; i++) {
-            addItem(i, item, handler);
+            setItem(i, item, handler);
         }
-        return this;
     }
 
     /**
      * Add an {@link ItemStack} to the inventory on multiple slots.
      *
-     * @param slots The slot of the item.
+     * @param slots The slots where to add the item
      * @param item  The item to add.
-     * @return This FastInv instance, for chaining.
      */
-    public FastInv addItem(int[] slots, ItemStack item) {
-        return addItem(slots, item, null);
+    public void setItems(int[] slots, ItemStack item) {
+        setItems(slots, item, null);
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on multiples slots with a click handler
+     * Add an {@link ItemStack} to the inventory on multiples slots with a click handler.
      *
-     * @param slots   The slots to place the item.
+     * @param slots   The slots where to add the item
      * @param item    The item to add.
-     * @param handler The the click handler for the item.
-     * @return This FastInv instance, for chaining.
+     * @param handler The click handler for the item
      */
-    public FastInv addItem(int[] slots, ItemStack item, Consumer<FastInvClickEvent> handler) {
+    public void setItems(int[] slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
         for (int slot : slots) {
-            addItem(slot, item, handler);
+            setItem(slot, item, handler);
         }
-        return this;
     }
 
     /**
-     * Add a handler to listen on inventory close.
+     * Remove an {@link ItemStack} from the inventory
      *
-     * @param listener The {@link Consumer<FastInvCloseEvent>} to add.
-     * @return This FastInv instance, for chaining.
+     * @param slot The slot where to remove the item
      */
-    public FastInv onClose(Consumer<FastInvCloseEvent> listener) {
-        closeHandlers.add(listener);
-        return this;
+    public void removeItem(int slot) {
+        inventory.clear(slot);
+        itemHandlers.remove(slot);
     }
 
     /**
-     * Add a handler to listen on inventory click.
+     * Remove multiples {@link ItemStack} from the inventory
      *
-     * @param listener The {@link Consumer<FastInvClickEvent>} to add.
-     * @return This FastInv instance, for chaining.
+     * @param slots The slots where to remove the items
      */
-    public FastInv onClick(Consumer<FastInvClickEvent> listener) {
-        clickHandlers.add(listener);
-        return this;
+    public void removeItems(int... slots) {
+        for (int slot : slots) {
+            removeItem(slot);
+        }
     }
 
     /**
-     * Schedule a task to run.
+     * Add a close filter to prevent players from closing the inventory.
+     * To prevent a player from closing the inventory the predicate should return {@code true}
      *
-     * @param period   Delay between each run.
-     * @param runnable The {@link Runnable} task to run.
-     * @return This FastInv instance, for chaining.
+     * @param closeFilter The close filter
      */
-    public FastInv onUpdate(long period, Runnable runnable) {
-        return onUpdate(period, period, runnable);
+    public void setCloseFilter(Predicate<Player> closeFilter) {
+        this.closeFilter = closeFilter;
     }
 
     /**
-     * Schedule a task to run with a delay before starting.
+     * Add a handler to handle inventory open.
      *
-     * @param delay    Ticks to wait before starting the task.
-     * @param period   Delay between each run.
-     * @param runnable The {@link Runnable} task to run.
-     * @return This FastInv instance, for chaining
+     * @param openHandler The handler to add.
      */
-    public FastInv onUpdate(long delay, long period, Runnable runnable) {
-        tasks.add(Bukkit.getScheduler().runTaskTimer(plugin, runnable, delay, period));
-        return this;
+    public void addOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
+        if (openHandlers == null) {
+            openHandlers = new HashSet<>();
+        }
+        openHandlers.add(openHandler);
+    }
+
+    /**
+     * Add a handler to handle inventory close.
+     *
+     * @param closeHandler The handler to add
+     */
+    public void addCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
+        if (closeHandlers == null) {
+            closeHandlers = new HashSet<>();
+        }
+        closeHandlers.add(closeHandler);
+    }
+
+    /**
+     * Add a handler to handle inventory click.
+     *
+     * @param clickHandler The handler to add.
+     */
+    public void addClickHandler(Consumer<InventoryClickEvent> clickHandler) {
+        if (clickHandlers == null) {
+            clickHandlers = new HashSet<>();
+        }
+        clickHandlers.add(clickHandler);
     }
 
     /**
@@ -267,15 +262,7 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
-        Bukkit.getScheduler().runTask(plugin, () -> player.openInventory(inventory));
-    }
-
-    /**
-     * Cancel all tasks.
-     */
-    public void cancelTasks() {
-        tasks.forEach(BukkitTask::cancel);
-        tasks.clear();
+        player.openInventory(inventory);
     }
 
     /**
@@ -289,31 +276,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Set if the tasks will be cancel on inventory close.
-     *
-     * @param cancelTasksOnClose Set if the tasks will be cancel
-     * @return This FastInv instance, for chaining.
-     */
-    public FastInv setCancelTasksOnClose(boolean cancelTasksOnClose) {
-        this.cancelTasksOnClose = cancelTasksOnClose;
-        return this;
-    }
-
-    /**
-     * Run a task on the server primary thread.
-     *
-     * @param runnable The runnable to run on the main thread
-     */
-    public void runSync(Runnable runnable) {
-        if (Bukkit.isPrimaryThread()) {
-            runnable.run();
-        } else {
-            Bukkit.getScheduler().runTask(plugin, runnable);
-        }
-    }
-
-    /**
-     * Get the Bukkit inventory associated with this FastInv instance.
+     * Get the Bukkit inventory
      *
      * @return The Bukkit {@link Inventory}.
      */
@@ -322,169 +285,35 @@ public class FastInv implements InventoryHolder {
         return inventory;
     }
 
-    private static Listener createListener() {
-        return new Listener() {
+    void handleOpen(InventoryOpenEvent e) {
+        onOpen(e);
 
-            @EventHandler
-            public void onClick(InventoryClickEvent event) {
-                if (event.getInventory().getHolder() instanceof FastInv && event.getWhoClicked() instanceof Player) {
-                    int slot = event.getRawSlot();
-                    FastInv inv = (FastInv) event.getInventory().getHolder();
-
-                    FastInvClickEvent clickEvent = new FastInvClickEvent((Player) event.getWhoClicked(), inv, slot,
-                            event.getCurrentItem(), true, event.getAction(), event.getClick());
-
-                    if (inv.itemHandlers.get(slot) != null) {
-                        inv.itemHandlers.get(slot).accept(clickEvent);
-                    }
-
-                    inv.clickHandlers.forEach(listener -> listener.accept(clickEvent));
-
-                    if (clickEvent.isCancelled()) {
-                        event.setCancelled(true);
-                    }
-                }
-            }
-
-            @EventHandler
-            public void onClose(InventoryCloseEvent event) {
-                if (event.getInventory().getHolder() instanceof FastInv && event.getPlayer() instanceof Player) {
-                    Player player = (Player) event.getPlayer();
-                    FastInv inv = (FastInv) event.getInventory().getHolder();
-
-                    FastInvCloseEvent closeEvent = new FastInvCloseEvent(player, inv, false);
-                    inv.closeHandlers.forEach(listener -> listener.accept(closeEvent));
-
-                    Bukkit.getScheduler().runTask(plugin, () -> {
-                        // Tiny delay to prevent errors.
-                        if (closeEvent.isCancelled() && player.isOnline()) {
-                            player.openInventory(inv.getInventory());
-                        } else if (inv.getInventory().getViewers().isEmpty() && inv.cancelTasksOnClose) {
-                            inv.cancelTasks();
-                        }
-                    });
-                }
-            }
-
-            @EventHandler
-            public void onDisable(PluginDisableEvent event) {
-                if (event.getPlugin().equals(plugin)) {
-                    for (Player player : Bukkit.getOnlinePlayers()) {
-                        if (player.getOpenInventory().getTopInventory().getHolder() instanceof FastInv) {
-                            player.closeInventory();
-                        }
-                    }
-                }
-            }
-        };
-    }
-
-    public static abstract class FastInvEvent implements Cancellable {
-
-        private Player player;
-        private FastInv inventory;
-        private boolean cancelled;
-
-        FastInvEvent(Player player, FastInv inventory, boolean cancelled) {
-            this.player = player;
-            this.inventory = inventory;
-            this.cancelled = cancelled;
-        }
-
-        /**
-         * Get the {@link Player} who clicked.
-         *
-         * @return the player who clicked.
-         */
-        public Player getPlayer() {
-            return player;
-        }
-
-        /**
-         * Get the FastInv inventory.
-         *
-         * @return This associated FastInv instance.
-         */
-        public FastInv getInventory() {
-            return inventory;
-        }
-
-        /**
-         * Get if the event is cancelled or not.
-         *
-         * @return Whether the event was cancelled.
-         */
-        @Override
-        public boolean isCancelled() {
-            return cancelled;
-        }
-
-        /**
-         * Set if the event will be cancel or not.
-         *
-         * @param cancel Whether the event should be cancelled.
-         */
-        @Override
-        public void setCancelled(boolean cancel) {
-            this.cancelled = cancel;
+        if (openHandlers != null) {
+            openHandlers.forEach(c -> c.accept(e));
         }
     }
 
-    public static class FastInvClickEvent extends FastInvEvent {
+    boolean handleClose(InventoryCloseEvent e) {
+        onClose(e);
 
-        private int slot;
-        private ItemStack item;
-        private InventoryAction action;
-        private ClickType clickType;
-
-        private FastInvClickEvent(Player player, FastInv inventory, int slot, ItemStack item, boolean cancelled, InventoryAction action, ClickType clickType) {
-            super(player, inventory, cancelled);
-            this.slot = slot;
-            this.item = item;
-            this.action = action;
-            this.clickType = clickType;
+        if (closeHandlers != null) {
+            closeHandlers.forEach(c -> c.accept(e));
         }
 
-        /**
-         * Get the number of the clicked slot
-         *
-         * @return The slot number
-         */
-        public int getSlot() {
-            return this.slot;
-        }
-
-        /**
-         * Get the clicked {@link ItemStack}
-         *
-         * @return The clicked item
-         */
-        public ItemStack getItem() {
-            return this.item;
-        }
-
-        /**
-         * Gets the {@link InventoryAction}
-         *
-         * @return The action of the event
-         */
-        public InventoryAction getAction() {
-            return this.action;
-        }
-
-        /**
-         * Gets the {@link ClickType} of the event.
-         *
-         * @return The click type
-         */
-        public ClickType getClickType() {
-            return this.clickType;
-        }
+        return closeFilter != null && closeFilter.test((Player) e.getPlayer());
     }
 
-    public static class FastInvCloseEvent extends FastInvEvent {
-        private FastInvCloseEvent(Player player, FastInv inventory, boolean cancelled) {
-            super(player, inventory, cancelled);
+    void handleClick(InventoryClickEvent e) {
+        onClick(e);
+
+        if (clickHandlers != null) {
+            clickHandlers.forEach(c -> c.accept(e));
+        }
+
+        Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getSlot());
+
+        if (clickConsumer != null) {
+            clickConsumer.accept(e);
         }
     }
 }

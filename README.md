@@ -1,94 +1,133 @@
 # FastInv
 [![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
-Small and easy inventory API with 1.7 to 1.13.2 support for Bukkit plugins !
-
-FastInv also come with a [ItemBuilder](src/main/java/fr/mrmicky/fastinv/ItemBuilder.java) (only for 1.8+) so you can quickly create ItemStack.
+Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
 
 ## Features
-* The API is in a single small class (less than 500 lines with the doc).
-* Custom inventory (size, title and type).
-* Items with custom ClickEvent.
+* Really small (only 2 class with less than 400 lines with the JavaDoc).
+* Works with all Bukkit versions from 1.7.10 to 1.13.2 !
+* Support custom inventories (size, title and type).
 * Easy to use.
-* Update task with configurable delay.
-* Option to prevent player to close the inventory.
-* Supports multiple update tasks with configurable delay.
-* The Bukkit methods can still be use with a FastInv.
-* All methods are thread-safe.
+* Option to prevent a player from closing the inventory
+* You can still access the Bukkit inventory without any problem
 
 ## How to use
-Using FastInv is really easy. Start with adding the [FastInv](src/main/java/fr/mrmicky/fastinv/FastInv.java) class to your project. Then add `FastInv.init(this);` in your `onEnable` method of your plugin like this:
+
+### Add FastInv in your plugin
+**Maven**
+```xml
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>fr.mrmicky.fastinv</pattern>
+                            <!-- Replace with the package of your plugin ! -->
+                            <shadedPattern>com.yourpackage.fastinv</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+```
+```xml
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+```
+```xml
+    <dependencies>
+        <dependency>
+            <groupId>fr.mrmicky</groupId>
+            <artifactId>FastInv</artifactId>
+            <version>v3.0</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+```
+
+**Manual**
+Just copy `FastInv.java` and `FastInvManager.java` in your plugin. You can also add `ItemBuilder.java`
+
+### Use FastInv
+
+#### Register FastInv
+Before creating inventories, you just need to register your plugin by adding `FastInvManager.register(this);` in your `onEnable` method of your plugin like this:
 ```java
 @Override
 public void onEnable() {
-	FastInv.init(this);
+    FastInvManager.register(this);
 }
 ```
 
-Now you can create a class that extends `FastInv` like this
+#### Create an inventory class
+Now you can create an inventory by make a class that extends `FastInv`, add items in the constructor. 
+You can also override `onClick`, `onClose` and `onOpen` if you need
+
+Just small example:
 ```java
-public class ExempleFullClassInventory extends FastInv {
+public class ExampleInventory extends FastInv {
 
-    private Random random = new Random();
+    private AtomicBoolean preventClose = new AtomicBoolean(false);
 
-    public ExempleFullClassInventory() {
-        super(27, "Exemple with FastInv");
+    public ExampleInventory() {
+        super(27, ChatColor.GOLD + "Example inventory");
 
-        addItem(0, 26, new ItemStack(Material.STAINED_GLASS_PANE), e -> e.getItem().setDurability((short) random.nextInt(16)));
+        // Just add a random item
+        setItem(13, new ItemStack(Material.IRON_SWORD), e -> e.getWhoClicked().sendMessage("You clicked on the sword"));
+
+        // Add a simple item to prevent closing the inventory
+        setItem(26, new ItemStack(Material.BARRIER), e -> preventClose.set(!preventClose.get()));
+
+        setCloseFilter(p -> preventClose.get());
+    }
+
+    @Override
+    protected void onOpen(InventoryOpenEvent event) {
+        event.getPlayer().sendMessage(ChatColor.GOLD + "You opened the inventory");
+    }
+
+    @Override
+    protected void onClose(InventoryCloseEvent event) {
+        event.getPlayer().sendMessage(ChatColor.GOLD + "You closed the inventory");
     }
 }
+````
+
+And to open the inventory
+```
+    new ExampleInventory().open(player);
 ```
 
-And just call the open method for open it
-```java
-new ExempleFullClassInventory().open(player);
-```
+#### Create a 'compact' inventory
 
-Or if you prefer you can just create a new FastInv like this
-```java
-Random random = new Random();
-FastInv inv = new FastInv(54, "Custom Menu");
-inv.addItem(22, new ItemStack(Material.NAME_TAG), event -> inv.addItem(new ItemStack(Material.OBSIDIAN)))
-	.onUpdate(20, () -> inv.addItem(int1, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
-	.onUpdate(10, () -> inv.addItem(int2, new ItemStack(Material.STAINED_GLASS_PANE, 1, (byte) random.nextInt(15))))
-	.open((Player) sender);
-```
+If you prefere you can create a 'compate' inventory that don't need a full class. But the first method you be use
 
-If you want to prevent the players to close the inventory, cancel the FastInvCloseEvent:
 ```java
-inv.onClose(event -> event.setCancelled(true));
-```
+        FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");
 
-If you do not want to cancel the InventoryClickEvent when a player clicks, use:
-```java
-inv.onClick(event -> event.setCancelled(false));
-```
-
-By default, when all players close the inventory, all tasks will be cancel. Though, if you
-want to use the same inventory multiples times, you can disable this feature as follow:
-```java
-inv.setCancelTasksOnClose(false);
-```
-Do not forget to cancel the tasks when you are done with the inventory!
-```java
-inv.cancelTasks();
-```
-
-You can get the FastInv object from a Bukkit inventory, just verify that its holder is an instance of FastInv and then cast it.
-```java
-if (bukkitInv.getHolder() instanceof FastInv) {
-	FastInv fastInv = (FastInv) bukkitInv.getHolder();
-	// Your code
-}
+        inv.setItem(4, new ItemStack(Material.NAME_TAG), e -> e.getWhoClicked().sendMessage("You clicked on the name tag"));
+        inv.addClickHandler(e -> player.sendMessage("You clicked on slot " + e.getSlot()));
+        inv.addCloseHandler(e -> player.sendMessage(ChatColor.YELLOW + "Inventory closed"));
+        inv.open(player);
 ```
 
 ## Changelog
-### Version 2.1
-* Replace `FastInvClickListener` with `Consumer<FastInvClickEvent>` and `FastInvCloseListener` with `Consumer<FastInvCloseEvent>`
 
-### Version 2
-* Replacing a listener per FastInv instance with a single listener.
-* With this, inventories no longer need to be destroyed, only tasks will be cancel.
-* Replace `setWillDestroy(destroy)` with `setCancelTasksOnClose(cancelTasksOnClose)`, and `destroy()` with `cancelTasks()`.
-* `getViewers()` was removed, use `getInventory().getViewers()` instead.
-* You can verify if a Bukkit inventory is a FastInv inventory by doing `bukkitInv.getHolder() instanceof FastInv` (and you can cast it to have the FastInv instance).
+[Changelog](CHANGELOG.md)
