@@ -77,7 +77,7 @@ public void onEnable() {
 ```
 
 #### Create an inventory class
-Now you can create an inventory by make a class that extends `FastInv`, add items in the constructor. 
+Now you can create an inventory by make a class that extends `FastInv`, and add items in the constructor. 
 You can also override `onClick`, `onClose` and `onOpen` if you need
 
 Just small example:
@@ -108,16 +108,16 @@ public class ExampleInventory extends FastInv {
         event.getPlayer().sendMessage(ChatColor.GOLD + "You closed the inventory");
     }
 }
-````
-
-And to open the inventory
 ```
+
+And open the inventory
+```java
     new ExampleInventory().open(player);
 ```
 
 #### Create a 'compact' inventory
 
-If you prefere you can create a 'compate' inventory that don't need a full class. But the first method you be use
+If you prefer you can create a 'compact' inventory that don't need a full class. But the first method should be use
 
 ```java
         FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");

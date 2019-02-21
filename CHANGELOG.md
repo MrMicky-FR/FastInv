@@ -13,7 +13,7 @@
 * Removed the FastInv events, now it just use the Bukkit events
 * Add `removeItem(int slot)` and `removeItems(int... slots)`, it's cleaner than adding a `null` item
 * Better `ItemBuilder`
-* If you have any problem with this new version you can contact me on Discord (link in the README)
+* If you have any problem with this new version you can contact me on Discord (link in the [README](README.md))
 
 ## Version 2.1 (20/12/2018)
 * Replace `FastInvClickListener` with `Consumer<FastInvClickEvent>` and `FastInvCloseListener` with `Consumer<FastInvCloseEvent>`
