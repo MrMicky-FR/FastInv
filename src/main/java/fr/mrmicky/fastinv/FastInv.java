@@ -28,13 +28,13 @@ import java.util.stream.IntStream;
  */
 public class FastInv implements InventoryHolder {
 
-    private Predicate<Player> closeFilter;
+    private final Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
 
     private Set<Consumer<InventoryOpenEvent>> openHandlers;
     private Set<Consumer<InventoryCloseEvent>> closeHandlers;
     private Set<Consumer<InventoryClickEvent>> clickHandlers;
-    private Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
 
+    private Predicate<Player> closeFilter;
     private Inventory inventory;
 
     /**

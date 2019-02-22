@@ -21,8 +21,8 @@ import java.util.function.Consumer;
  */
 public class ItemBuilder {
 
-    private ItemStack item;
-    private ItemMeta meta;
+    private final ItemStack item;
+    private final ItemMeta meta;
 
     public ItemBuilder(Material material) {
         this(new ItemStack(material));
@@ -30,7 +30,7 @@ public class ItemBuilder {
 
     public ItemBuilder(ItemStack item) {
         this.item = Objects.requireNonNull(item, "item");
-        meta = item.getItemMeta();
+        this.meta = item.getItemMeta();
     }
 
     public ItemBuilder type(Material material) {
@@ -107,7 +107,7 @@ public class ItemBuilder {
         List<String> lore = meta.getLore();
 
         if (lore == null) {
-            return lore(Collections.singletonList(line));
+            return lore(line);
         }
 
         lore.add(line);
