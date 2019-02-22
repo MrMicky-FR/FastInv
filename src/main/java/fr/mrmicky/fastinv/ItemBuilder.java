@@ -21,8 +21,8 @@ import java.util.function.Consumer;
  */
 public class ItemBuilder {
 
-    private ItemStack item;
-    private ItemMeta meta;
+    private final ItemStack item;
+    private final ItemMeta meta;
 
     public ItemBuilder(Material material) {
         this(new ItemStack(material));
