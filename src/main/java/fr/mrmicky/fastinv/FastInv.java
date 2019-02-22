@@ -33,6 +33,7 @@ public class FastInv implements InventoryHolder {
     private Set<Consumer<InventoryOpenEvent>> openHandlers;
     private Set<Consumer<InventoryCloseEvent>> closeHandlers;
     private Set<Consumer<InventoryClickEvent>> clickHandlers;
+
     private Predicate<Player> closeFilter;
     private Inventory inventory;
 
