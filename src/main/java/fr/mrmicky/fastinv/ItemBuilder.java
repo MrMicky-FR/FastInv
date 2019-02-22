@@ -30,7 +30,7 @@ public class ItemBuilder {
 
     public ItemBuilder(ItemStack item) {
         this.item = Objects.requireNonNull(item, "item");
-        meta = item.getItemMeta();
+        this.meta = item.getItemMeta();
     }
 
     public ItemBuilder type(Material material) {
