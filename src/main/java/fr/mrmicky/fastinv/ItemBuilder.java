@@ -114,22 +114,22 @@ public class ItemBuilder {
         return lore(lore);
     }
 
-    public ItemBuilder flags(ItemFlag... flags) {
+    public ItemBuilder flag(ItemFlag... flags) {
         meta.addItemFlags(flags);
         return this;
     }
 
     public ItemBuilder flags() {
-        return flags(ItemFlag.values());
+        return flag(ItemFlag.values());
     }
 
-    public ItemBuilder removeFlags(ItemFlag... flags) {
+    public ItemBuilder removeFlag(ItemFlag... flags) {
         meta.removeItemFlags(flags);
         return this;
     }
 
     public ItemBuilder removeFlags() {
-        return removeFlags(ItemFlag.values());
+        return removeFlag(ItemFlag.values());
     }
 
     public ItemBuilder unbreakable() {
