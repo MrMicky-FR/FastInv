@@ -28,13 +28,12 @@ import java.util.stream.IntStream;
  */
 public class FastInv implements InventoryHolder {
 
+    private final Set<Consumer<InventoryOpenEvent>> openHandlers = new HashSet<>();
+    private final Set<Consumer<InventoryCloseEvent>> closeHandlers = new HashSet<>();
+    private final Set<Consumer<InventoryClickEvent>> clickHandlers = new HashSet<>();
+    private final Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
+
     private Predicate<Player> closeFilter;
-
-    private Set<Consumer<InventoryOpenEvent>> openHandlers;
-    private Set<Consumer<InventoryCloseEvent>> closeHandlers;
-    private Set<Consumer<InventoryClickEvent>> clickHandlers;
-    private Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
-
     private Inventory inventory;
 
     /**
@@ -226,9 +225,6 @@ public class FastInv implements InventoryHolder {
      * @param openHandler The handler to add.
      */
     public void addOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
-        if (openHandlers == null) {
-            openHandlers = new HashSet<>();
-        }
         openHandlers.add(openHandler);
     }
 
@@ -238,9 +234,6 @@ public class FastInv implements InventoryHolder {
      * @param closeHandler The handler to add
      */
     public void addCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
-        if (closeHandlers == null) {
-            closeHandlers = new HashSet<>();
-        }
         closeHandlers.add(closeHandler);
     }
 
@@ -250,9 +243,6 @@ public class FastInv implements InventoryHolder {
      * @param clickHandler The handler to add.
      */
     public void addClickHandler(Consumer<InventoryClickEvent> clickHandler) {
-        if (clickHandlers == null) {
-            clickHandlers = new HashSet<>();
-        }
         clickHandlers.add(clickHandler);
     }
 
