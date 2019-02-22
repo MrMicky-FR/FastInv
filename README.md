@@ -1,4 +1,5 @@
 # FastInv
+[![JitPack](https://jitpack.io/v/fr.mrmicky/FastInv.svg)](https://jitpack.io/#fr.mrmicky/FastInv)
 [![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
 Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
@@ -94,10 +95,10 @@ public class ExampleInventory extends FastInv {
         setItem(22, new ItemStack(Material.IRON_SWORD), e -> e.getWhoClicked().sendMessage("You clicked on the sword"));
 
         // Add some blocks to the borders
-        setItems(getBorders(), new ItemBuilder(Material.LAPIS_BLOCK).name("").build());
+        setItems(getBorders(), new ItemBuilder(Material.LAPIS_BLOCK).name(" ").build());
 
         // Add a simple item to prevent closing the inventory
-        setItem(34, new ItemStack(Material.BARRIER), e -> preventClose.set(!preventClose.get()));
+        setItem(34, new ItemBuilder(Material.BARRIER).name(ChatColor.RED + "Prevent close").build(), e -> preventClose.set(!preventClose.get()));
 
         // Prevent from closing when preventClose is to true
         setCloseFilter(p -> preventClose.get());
@@ -118,7 +119,6 @@ public class ExampleInventory extends FastInv {
         // do something
     }
 }
-
 ```
 
 And open the inventory
