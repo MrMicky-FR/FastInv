@@ -119,10 +119,6 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder flags() {
-        return flag(ItemFlag.values());
-    }
-
     public ItemBuilder removeFlag(ItemFlag... flags) {
         meta.removeItemFlags(flags);
         return this;
