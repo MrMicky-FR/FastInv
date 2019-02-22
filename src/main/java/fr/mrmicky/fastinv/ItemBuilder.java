@@ -99,17 +99,6 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder addLore(String line) {
-        List<String> lore = meta.getLore();
-
-        if (lore == null) {
-            return lore(Collections.singletonList(line));
-        }
-
-        lore.add(line);
-        return lore(lore);
-    }
-
     public ItemBuilder addLore(String... lines) {
         return addLore(Arrays.asList(lines));
     }
