@@ -88,27 +88,37 @@ public class ExampleInventory extends FastInv {
     private AtomicBoolean preventClose = new AtomicBoolean(false);
 
     public ExampleInventory() {
-        super(27, ChatColor.GOLD + "Example inventory");
+        super(45, ChatColor.GOLD + "Example inventory");
 
         // Just add a random item
-        setItem(13, new ItemStack(Material.IRON_SWORD), e -> e.getWhoClicked().sendMessage("You clicked on the sword"));
+        setItem(22, new ItemStack(Material.IRON_SWORD), e -> e.getWhoClicked().sendMessage("You clicked on the sword"));
+
+        // Add some blocks to the borders
+        setItems(getBorders(), new ItemBuilder(Material.LAPIS_BLOCK).name("").build());
 
         // Add a simple item to prevent closing the inventory
-        setItem(26, new ItemStack(Material.BARRIER), e -> preventClose.set(!preventClose.get()));
+        setItem(34, new ItemStack(Material.BARRIER), e -> preventClose.set(!preventClose.get()));
 
+        // Prevent from closing when preventClose is to true
         setCloseFilter(p -> preventClose.get());
     }
 
     @Override
-    protected void onOpen(InventoryOpenEvent event) {
+    public void onOpen(InventoryOpenEvent event) {
         event.getPlayer().sendMessage(ChatColor.GOLD + "You opened the inventory");
     }
 
     @Override
-    protected void onClose(InventoryCloseEvent event) {
+    public void onClose(InventoryCloseEvent event) {
         event.getPlayer().sendMessage(ChatColor.GOLD + "You closed the inventory");
     }
+
+    @Override
+    public void onClick(InventoryClickEvent event) {
+        // do something
+    }
 }
+
 ```
 
 And open the inventory
