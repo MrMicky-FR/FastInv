@@ -63,6 +63,7 @@ Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
 ```
 
 **Manual**
+
 Just copy `FastInv.java` and `FastInvManager.java` in your plugin. You can also add `ItemBuilder.java`
 
 ### Use FastInv

@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Simple builder to create {@link ItemStack}
+ * Simple {@link ItemStack} builder
  *
  * @author MrMicky
  */
@@ -77,9 +77,9 @@ public class ItemBuilder {
         return this;
     }
 
-    @SuppressWarnings("unchecked")
     public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
         if (metaClass.isAssignableFrom(meta.getClass())) {
+            //noinspection unchecked
             metaConsumer.accept((T) meta);
         }
         return this;
