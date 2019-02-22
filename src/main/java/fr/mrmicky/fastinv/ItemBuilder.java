@@ -90,6 +90,10 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder lore(String lore) {
+        return lore(Collections.singletonList(lore));
+    }
+
     public ItemBuilder lore(String... lore) {
         return lore(Arrays.asList(lore));
     }
@@ -97,6 +101,17 @@ public class ItemBuilder {
     public ItemBuilder lore(List<String> lore) {
         meta.setLore(lore);
         return this;
+    }
+
+    public ItemBuilder addLore(String line) {
+        List<String> lore = meta.getLore();
+
+        if (lore == null) {
+            return lore(line);
+        }
+
+        lore.add(line);
+        return lore(lore);
     }
 
     public ItemBuilder addLore(String... lines) {
@@ -114,18 +129,22 @@ public class ItemBuilder {
         return lore(lore);
     }
 
-    public ItemBuilder flag(ItemFlag... flags) {
+    public ItemBuilder flags(ItemFlag... flags) {
         meta.addItemFlags(flags);
         return this;
     }
 
-    public ItemBuilder removeFlag(ItemFlag... flags) {
+    public ItemBuilder flags() {
+        return flags(ItemFlag.values());
+    }
+
+    public ItemBuilder removeFlags(ItemFlag... flags) {
         meta.removeItemFlags(flags);
         return this;
     }
 
     public ItemBuilder removeFlags() {
-        return removeFlag(ItemFlag.values());
+        return removeFlags(ItemFlag.values());
     }
 
     public ItemBuilder unbreakable() {
