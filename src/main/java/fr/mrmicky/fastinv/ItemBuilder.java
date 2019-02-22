@@ -90,10 +90,6 @@ public class ItemBuilder {
         return this;
     }
 
-    public ItemBuilder lore(String lore) {
-        return lore(Collections.singletonList(lore));
-    }
-
     public ItemBuilder lore(String... lore) {
         return lore(Arrays.asList(lore));
     }
