@@ -278,17 +278,13 @@ public class FastInv implements InventoryHolder {
     void handleOpen(InventoryOpenEvent e) {
         onOpen(e);
 
-        if (openHandlers != null) {
-            openHandlers.forEach(c -> c.accept(e));
-        }
+        openHandlers.forEach(c -> c.accept(e));
     }
 
     boolean handleClose(InventoryCloseEvent e) {
         onClose(e);
 
-        if (closeHandlers != null) {
-            closeHandlers.forEach(c -> c.accept(e));
-        }
+        closeHandlers.forEach(c -> c.accept(e));
 
         return closeFilter != null && closeFilter.test((Player) e.getPlayer());
     }
@@ -296,9 +292,7 @@ public class FastInv implements InventoryHolder {
     void handleClick(InventoryClickEvent e) {
         onClick(e);
 
-        if (clickHandlers != null) {
-            clickHandlers.forEach(c -> c.accept(e));
-        }
+        clickHandlers.forEach(c -> c.accept(e));
 
         Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getSlot());
 
