@@ -76,9 +76,10 @@ public class FastInv implements InventoryHolder {
     }
 
     private FastInv(int size, InventoryType type, String title) {
-        if (type == InventoryType.CHEST && size > 0) {
+       FastInvManager.init();
+    	if (type == InventoryType.CHEST && size > 0) 
             inventory = Bukkit.createInventory(this, size, title);
-        } else {
+        else {
             inventory = Bukkit.createInventory(this, Objects.requireNonNull(type, "type"), title);
         }
     }
@@ -109,9 +110,9 @@ public class FastInv implements InventoryHolder {
      */
     public void addItem(ItemStack item, Consumer<InventoryClickEvent> handler) {
         int slot = inventory.firstEmpty();
-        if (slot >= 0) {
+        if (slot >= 0) 
             setItem(slot, item, handler);
-        }
+        
     }
 
     /**
@@ -136,7 +137,7 @@ public class FastInv implements InventoryHolder {
 
         if (handler != null) {
             itemHandlers.put(slot, handler);
-        } else {
+        else {
             itemHandlers.remove(slot);
         }
     }
@@ -161,9 +162,9 @@ public class FastInv implements InventoryHolder {
      * @param handler  The click handler for the item
      */
     public void setItems(int slotFrom, int slotTo, ItemStack item, Consumer<InventoryClickEvent> handler) {
-        for (int i = slotFrom; i <= slotTo; i++) {
+        for (int i = slotFrom; i <= slotTo; i++) 
             setItem(i, item, handler);
-        }
+        
     }
 
     /**
@@ -184,9 +185,9 @@ public class FastInv implements InventoryHolder {
      * @param handler The click handler for the item
      */
     public void setItems(int[] slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
-        for (int slot : slots) {
+        for (int slot : slots) 
             setItem(slot, item, handler);
-        }
+        
     }
 
     /**
@@ -205,9 +206,9 @@ public class FastInv implements InventoryHolder {
      * @param slots The slots where to remove the items
      */
     public void removeItems(int... slots) {
-        for (int slot : slots) {
+        for (int slot : slots) 
             removeItem(slot);
-        }
+        
     }
 
     /**
@@ -226,9 +227,9 @@ public class FastInv implements InventoryHolder {
      * @param openHandler The handler to add.
      */
     public void addOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
-        if (openHandlers == null) {
+        if (openHandlers == null) 
             openHandlers = new HashSet<>();
-        }
+        
         openHandlers.add(openHandler);
     }
 
@@ -238,9 +239,9 @@ public class FastInv implements InventoryHolder {
      * @param closeHandler The handler to add
      */
     public void addCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
-        if (closeHandlers == null) {
+        if (closeHandlers == null) 
             closeHandlers = new HashSet<>();
-        }
+        
         closeHandlers.add(closeHandler);
     }
 
@@ -250,9 +251,9 @@ public class FastInv implements InventoryHolder {
      * @param clickHandler The handler to add.
      */
     public void addClickHandler(Consumer<InventoryClickEvent> clickHandler) {
-        if (clickHandlers == null) {
+        if (clickHandlers == null) 
             clickHandlers = new HashSet<>();
-        }
+        
         clickHandlers.add(clickHandler);
     }
 
@@ -296,19 +297,19 @@ public class FastInv implements InventoryHolder {
     boolean handleClose(InventoryCloseEvent e) {
         onClose(e);
 
-        if (closeHandlers != null) {
+        if (closeHandlers != null) 
             closeHandlers.forEach(c -> c.accept(e));
-        }
+        
 
         return closeFilter != null && closeFilter.test((Player) e.getPlayer());
     }
 
     void handleClick(InventoryClickEvent e) {
         onClick(e);
-
-        if (clickHandlers != null) {
+        
+        if (clickHandlers != null) 
             clickHandlers.forEach(c -> c.accept(e));
-        }
+        
 
         Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getSlot());
 

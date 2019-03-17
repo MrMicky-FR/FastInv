@@ -21,12 +21,15 @@ public final class FastInvManager {
 
     private static final AtomicBoolean REGISTER = new AtomicBoolean(false);
 
-    public static void register(Plugin plugin) {
+    public static void init() {
+        
+    	Plugin plugin = Bukkit.getPlugins()[0];
         Objects.requireNonNull(plugin, "plugin");
 
         if (REGISTER.getAndSet(true)) {
-            throw new IllegalStateException("FastInv is already registered");
+           return;
         }
+        
 
         Bukkit.getPluginManager().registerEvents(new Listener() {
 
