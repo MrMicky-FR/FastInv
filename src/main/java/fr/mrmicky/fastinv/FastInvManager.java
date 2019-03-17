@@ -17,10 +17,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * @author MrMicky
  */
+
 public final class FastInvManager {
 
     private static final AtomicBoolean REGISTER = new AtomicBoolean(false);
-
+    
     public static void init() {
         
     	Plugin plugin = Bukkit.getPlugins()[0];

@@ -26,6 +26,7 @@ import java.util.stream.IntStream;
  * @author MrMicky
  * @version 3.0
  */
+
 public class FastInv implements InventoryHolder {
 
     private final Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
