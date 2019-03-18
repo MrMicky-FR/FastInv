@@ -31,6 +31,10 @@ public class ItemBuilder {
     public ItemBuilder(ItemStack item) {
         this.item = Objects.requireNonNull(item, "item");
         this.meta = item.getItemMeta();
+
+        if (meta == null) {
+            throw new IllegalArgumentException("The type " + item.getType() + " don't support item meta");
+        }
     }
 
     public ItemBuilder type(Material material) {
