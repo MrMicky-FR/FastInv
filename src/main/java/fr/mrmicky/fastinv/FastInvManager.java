@@ -15,12 +15,21 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
+ * Manager for handling inventory events to FastInv
+ *
  * @author MrMicky
  */
 public final class FastInvManager {
 
     private static final AtomicBoolean REGISTER = new AtomicBoolean(false);
 
+    /**
+     * Register events for FastInv
+     *
+     * @param plugin Plugin to register
+     * @throws NullPointerException if plugin is null
+     * @throws IllegalStateException if FastInv is already registered
+     */
     public static void register(Plugin plugin) {
         Objects.requireNonNull(plugin, "plugin");
 
@@ -76,6 +85,9 @@ public final class FastInvManager {
         }, plugin);
     }
 
+    /**
+     * Close all open FastInv inventories
+     */
     public static void closeAll() {
         Bukkit.getOnlinePlayers().stream()
                 .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
