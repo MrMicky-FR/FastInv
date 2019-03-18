@@ -78,9 +78,8 @@ public class ItemBuilder {
     }
 
     public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
-        if (metaClass.isAssignableFrom(meta.getClass())) {
-            //noinspection unchecked
-            metaConsumer.accept((T) meta);
+        if (metaClass.isInstance(meta)) {
+            metaConsumer.accept(metaClass.cast(meta));
         }
         return this;
     }
