@@ -2,11 +2,11 @@
 [![JitPack](https://jitpack.io/v/fr.mrmicky/FastInv.svg)](https://jitpack.io/#fr.mrmicky/FastInv)
 [![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
-Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
+Small and easy Bukkit inventory API with 1.7 to 1.14 support !
 
 ## Features
 * Really small (only 2 class with less than 400 lines with the JavaDoc).
-* Works with all Bukkit versions from 1.7.10 to 1.13.2 !
+* Works with all Bukkit versions from 1.7.10 to 1.14 !
 * Support custom inventories (size, title and type).
 * Easy to use.
 * Option to prevent a player from closing the inventory

@@ -20,7 +20,7 @@ import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
- * Small and easy Bukkit inventory API with 1.7 to 1.13.2 support !
+ * Small and easy Bukkit inventory API with 1.7 to 1.14 support !
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
  *
  * @author MrMicky
@@ -278,7 +278,7 @@ public class FastInv implements InventoryHolder {
     /**
      * Get the Bukkit inventory
      *
-     * @return The Bukkit {@link Inventory}.
+     * @return The Bukkit inventory.
      */
     @Override
     public Inventory getInventory() {
