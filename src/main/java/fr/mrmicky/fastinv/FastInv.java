@@ -81,6 +81,10 @@ public class FastInv implements InventoryHolder {
         } else {
             inventory = Bukkit.createInventory(this, Objects.requireNonNull(type, "type"), title);
         }
+
+        if (inventory.getHolder() != this) {
+            throw new IllegalStateException("Inventory holder is not FastInv, found: " + inventory.getHolder());
+        }
     }
 
     protected void onOpen(InventoryOpenEvent event) {
