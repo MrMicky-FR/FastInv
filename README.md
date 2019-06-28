@@ -57,7 +57,7 @@ Small and easy Bukkit inventory API with 1.7 to 1.14 support !
         <dependency>
             <groupId>fr.mrmicky</groupId>
             <artifactId>FastInv</artifactId>
-            <version>v3.0</version>
+            <version>3.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
