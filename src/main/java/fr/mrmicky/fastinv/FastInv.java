@@ -314,7 +314,7 @@ public class FastInv implements InventoryHolder {
             clickHandlers.forEach(c -> c.accept(e));
         }
 
-        Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getSlot());
+        Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getRawSlot());
 
         if (clickConsumer != null) {
             clickConsumer.accept(e);

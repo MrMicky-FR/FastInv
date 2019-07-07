@@ -57,7 +57,7 @@ Small and easy Bukkit inventory API with 1.7 to 1.14 support !
         <dependency>
             <groupId>fr.mrmicky</groupId>
             <artifactId>FastInv</artifactId>
-            <version>3.0</version>
+            <version>3.0.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -86,7 +86,7 @@ Just small example:
 ```java
 public class ExampleInventory extends FastInv {
 
-    private AtomicBoolean preventClose = new AtomicBoolean(false);
+    private boolean preventClose = false;
 
     public ExampleInventory() {
         super(45, ChatColor.GOLD + "Example inventory");
@@ -98,10 +98,12 @@ public class ExampleInventory extends FastInv {
         setItems(getBorders(), new ItemBuilder(Material.LAPIS_BLOCK).name(" ").build());
 
         // Add a simple item to prevent closing the inventory
-        setItem(34, new ItemBuilder(Material.BARRIER).name(ChatColor.RED + "Prevent close").build(), e -> preventClose.set(!preventClose.get()));
+        setItem(34, new ItemBuilder(Material.BARRIER).name(ChatColor.RED + "Prevent close").build(), e -> {
+            preventClose = !preventClose;
+        });
 
         // Prevent from closing when preventClose is to true
-        setCloseFilter(p -> preventClose.get());
+        setCloseFilter(p -> preventClose);
     }
 
     @Override
