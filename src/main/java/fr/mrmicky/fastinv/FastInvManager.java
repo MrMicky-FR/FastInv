@@ -80,6 +80,8 @@ public final class FastInvManager {
             public void onPluginDisable(PluginDisableEvent e) {
                 if (e.getPlugin() == plugin) {
                     closeAll();
+
+                    REGISTER.set(false);
                 }
             }
         }, plugin);
