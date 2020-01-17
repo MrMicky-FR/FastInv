@@ -37,54 +37,7 @@ public final class FastInvManager {
             throw new IllegalStateException("FastInv is already registered");
         }
 
-        Bukkit.getPluginManager().registerEvents(new Listener() {
-
-            @EventHandler(priority = EventPriority.LOW)
-            public void onInventoryClick(InventoryClickEvent e) {
-                if (e.getInventory().getHolder() instanceof FastInv && e.getClickedInventory() != null) {
-                    FastInv inv = (FastInv) e.getInventory().getHolder();
-
-                    boolean wasCancelled = e.isCancelled();
-                    e.setCancelled(true);
-
-                    inv.handleClick(e);
-
-                    // This prevent to uncancel the event if an other plugin cancelled it before
-                    if (!wasCancelled && !e.isCancelled()) {
-                        e.setCancelled(false);
-                    }
-                }
-            }
-
-            @EventHandler
-            public void onInventoryOpen(InventoryOpenEvent e) {
-                if (e.getInventory().getHolder() instanceof FastInv) {
-                    FastInv inv = (FastInv) e.getInventory().getHolder();
-
-                    inv.handleOpen(e);
-                }
-            }
-
-            @EventHandler
-            public void onInventoryClose(InventoryCloseEvent e) {
-                if (e.getInventory().getHolder() instanceof FastInv) {
-                    FastInv inv = (FastInv) e.getInventory().getHolder();
-
-                    if (inv.handleClose(e)) {
-                        Bukkit.getScheduler().runTask(plugin, () -> inv.open((Player) e.getPlayer()));
-                    }
-                }
-            }
-
-            @EventHandler
-            public void onPluginDisable(PluginDisableEvent e) {
-                if (e.getPlugin() == plugin) {
-                    closeAll();
-
-                    REGISTER.set(false);
-                }
-            }
-        }, plugin);
+        Bukkit.getPluginManager().registerEvents(new InventoryListener(plugin), plugin);
     }
 
     /**
@@ -94,5 +47,60 @@ public final class FastInvManager {
         Bukkit.getOnlinePlayers().stream()
                 .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
                 .forEach(Player::closeInventory);
+    }
+
+    public static final class InventoryListener implements Listener {
+
+        private final Plugin plugin;
+
+        public InventoryListener(Plugin plugin) {
+            this.plugin = plugin;
+        }
+
+        @EventHandler(priority = EventPriority.LOW)
+        public void onInventoryClick(InventoryClickEvent e) {
+            if (e.getInventory().getHolder() instanceof FastInv && e.getClickedInventory() != null) {
+                FastInv inv = (FastInv) e.getInventory().getHolder();
+
+                boolean wasCancelled = e.isCancelled();
+                e.setCancelled(true);
+
+                inv.handleClick(e);
+
+                // This prevent to uncancel the event if an other plugin cancelled it before
+                if (!wasCancelled && !e.isCancelled()) {
+                    e.setCancelled(false);
+                }
+            }
+        }
+
+        @EventHandler
+        public void onInventoryOpen(InventoryOpenEvent e) {
+            if (e.getInventory().getHolder() instanceof FastInv) {
+                FastInv inv = (FastInv) e.getInventory().getHolder();
+
+                inv.handleOpen(e);
+            }
+        }
+
+        @EventHandler
+        public void onInventoryClose(InventoryCloseEvent e) {
+            if (e.getInventory().getHolder() instanceof FastInv) {
+                FastInv inv = (FastInv) e.getInventory().getHolder();
+
+                if (inv.handleClose(e)) {
+                    Bukkit.getScheduler().runTask(plugin, () -> inv.open((Player) e.getPlayer()));
+                }
+            }
+        }
+
+        @EventHandler
+        public void onPluginDisable(PluginDisableEvent e) {
+            if (e.getPlugin() == plugin) {
+                closeAll();
+
+                REGISTER.set(false);
+            }
+        }
     }
 }

@@ -46,8 +46,8 @@ public class ItemBuilder {
         return durability((short) data);
     }
 
+    @SuppressWarnings("deprecation")
     public ItemBuilder durability(short durability) {
-        //noinspection deprecation - legacy support
         item.setDurability(durability);
         return this;
     }
@@ -148,16 +148,6 @@ public class ItemBuilder {
 
     public ItemBuilder removeFlags() {
         return removeFlags(ItemFlag.values());
-    }
-
-    public ItemBuilder unbreakable() {
-        return unbreakable(true);
-    }
-
-    public ItemBuilder unbreakable(boolean unbreakable) {
-        //noinspection deprecation - legacy support
-        meta.spigot().setUnbreakable(unbreakable);
-        return this;
     }
 
     public ItemBuilder armorColor(Color color) {
