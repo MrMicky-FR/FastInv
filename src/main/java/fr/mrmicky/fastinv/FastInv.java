@@ -280,6 +280,16 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Get corners of the inventory.
+     *
+     * @return inventory corners
+     */
+    public int[] getCorners() {
+        int size = inventory.getSize();
+        return IntStream.range(0, size).filter(i -> i % 9 == 0 && (i < 10 || i > size - 19) || (i - 1) % 9 == 0 && (i < 2 || i > size - 9) || (i - 7) % 9 == 0 && (i < 9 || i > size - 3) || (i - 8) % 9 == 0 && (i < 18 || i > size - 11)).toArray();
+    }
+
+    /**
      * Get the Bukkit inventory
      *
      * @return The Bukkit inventory.
