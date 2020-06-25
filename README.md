@@ -2,11 +2,11 @@
 [![JitPack](https://jitpack.io/v/fr.mrmicky/FastInv.svg)](https://jitpack.io/#fr.mrmicky/FastInv)
 [![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
-Small and easy Bukkit inventory API with 1.7 to 1.15 support !
+Small and easy Bukkit inventory API with 1.7 to 1.16 support.
 
 ## Features
 * Really small (only 2 class with less than 400 lines with the JavaDoc).
-* Works with all Bukkit versions from 1.7.10 to 1.15 !
+* Works with all Bukkit versions from 1.7.10 to 1.16.
 * Support custom inventories (size, title and type).
 * Easy to use.
 * Option to prevent a player from closing the inventory
@@ -15,55 +15,68 @@ Small and easy Bukkit inventory API with 1.7 to 1.15 support !
 ## How to use
 
 ### Add FastInv in your plugin
-**Maven**
+
+#### Maven
 ```xml
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.1</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <relocations>
-                        <relocation>
-                            <pattern>fr.mrmicky.fastinv</pattern>
-                            <!-- Replace with the package of your plugin ! -->
-                            <shadedPattern>com.yourpackage.fastinv</shadedPattern>
-                        </relocation>
-                    </relocations>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.1</version>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>shade</goal>
+                    </goals>
+                </execution>
+            </executions>
+            <configuration>
+                <relocations>
+                    <relocation>
+                        <pattern>fr.mrmicky.fastinv</pattern>
+                        <!-- Replace with the package of your plugin ! -->
+                        <shadedPattern>com.yourpackage.fastinv</shadedPattern>
+                    </relocation>
+                </relocations>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
 ```
 ```xml
-    <repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
 ```
 ```xml
-    <dependencies>
-        <dependency>
-            <groupId>fr.mrmicky</groupId>
-            <artifactId>FastInv</artifactId>
-            <version>3.0.2</version>
-            <scope>compile</scope>
-        </dependency>
-    </dependencies>
+<dependencies>
+    <dependency>
+        <groupId>fr.mrmicky</groupId>
+        <artifactId>FastInv</artifactId>
+        <version>3.0.2</version>
+        <scope>compile</scope>
+    </dependency>
+</dependencies>
 ```
 
-**Manual**
+#### Gradle
+```groovy
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+```
+```groovy
+dependencies {
+    compile 'fr.mrmicky:FastInv:3.0.2'
+}
+```
+
+#### Manual
 
 Just copy `FastInv.java` and `FastInvManager.java` in your plugin. You can also add `ItemBuilder.java`
 
@@ -82,8 +95,20 @@ public void onEnable() {
 Now you can create an inventory by make a class that extends `FastInv`, and add items in the constructor. 
 You can also override `onClick`, `onClose` and `onOpen` if you need
 
-Just small example:
+Small example inventory:
 ```java
+package fr.mrmicky.fastinv.test;
+
+import fr.mrmicky.fastinv.FastInv;
+import fr.mrmicky.fastinv.ItemBuilder;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.inventory.ItemStack;
+
+
 public class ExampleInventory extends FastInv {
 
     private boolean preventClose = false;
@@ -123,14 +148,14 @@ public class ExampleInventory extends FastInv {
 }
 ```
 
-And open the inventory
+Now you can open the inventory:
 ```java
-    new ExampleInventory().open(player);
+new ExampleInventory().open(player);
 ```
 
 #### Create a 'compact' inventory
 
-If you prefer you can create a 'compact' inventory that don't need a full class. But the first method should be use
+If you prefer you can create a 'compact' inventory that don't need a full class, but this is not recommended.
 
 ```java
         FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");
