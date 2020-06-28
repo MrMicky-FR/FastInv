@@ -108,7 +108,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.ItemStack;
 
-
 public class ExampleInventory extends FastInv {
 
     private boolean preventClose = false;
