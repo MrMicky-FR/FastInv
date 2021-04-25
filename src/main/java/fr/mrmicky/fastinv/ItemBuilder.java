@@ -1,3 +1,26 @@
+/*
+ * This file is part of FastInv, licensed under the MIT License.
+ *
+ * Copyright (c) 2018-2021 MrMicky
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package fr.mrmicky.fastinv;
 
 import org.bukkit.Color;
@@ -32,13 +55,13 @@ public class ItemBuilder {
         this.item = Objects.requireNonNull(item, "item");
         this.meta = item.getItemMeta();
 
-        if (meta == null) {
-            throw new IllegalArgumentException("The type " + item.getType() + " don't support item meta");
+        if (this.meta == null) {
+            throw new IllegalArgumentException("The type " + item.getType() + " doesn't support item meta");
         }
     }
 
     public ItemBuilder type(Material material) {
-        item.setType(material);
+        this.item.setType(material);
         return this;
     }
 
@@ -48,12 +71,12 @@ public class ItemBuilder {
 
     @SuppressWarnings("deprecation")
     public ItemBuilder durability(short durability) {
-        item.setDurability(durability);
+        this.item.setDurability(durability);
         return this;
     }
 
     public ItemBuilder amount(int amount) {
-        item.setAmount(amount);
+        this.item.setAmount(amount);
         return this;
     }
 
@@ -62,34 +85,34 @@ public class ItemBuilder {
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
-        meta.addEnchant(enchantment, level, true);
+        this.meta.addEnchant(enchantment, level, true);
         return this;
     }
 
     public ItemBuilder removeEnchant(Enchantment enchantment) {
-        meta.removeEnchant(enchantment);
+        this.meta.removeEnchant(enchantment);
         return this;
     }
 
     public ItemBuilder removeEnchants() {
-        meta.getEnchants().keySet().forEach(meta::removeEnchant);
+        this.meta.getEnchants().keySet().forEach(this.meta::removeEnchant);
         return this;
     }
 
     public ItemBuilder meta(Consumer<ItemMeta> metaConsumer) {
-        metaConsumer.accept(meta);
+        metaConsumer.accept(this.meta);
         return this;
     }
 
     public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
-        if (metaClass.isInstance(meta)) {
-            metaConsumer.accept(metaClass.cast(meta));
+        if (metaClass.isInstance(this.meta)) {
+            metaConsumer.accept(metaClass.cast(this.meta));
         }
         return this;
     }
 
     public ItemBuilder name(String name) {
-        meta.setDisplayName(name);
+        this.meta.setDisplayName(name);
         return this;
     }
 
@@ -102,12 +125,12 @@ public class ItemBuilder {
     }
 
     public ItemBuilder lore(List<String> lore) {
-        meta.setLore(lore);
+        this.meta.setLore(lore);
         return this;
     }
 
     public ItemBuilder addLore(String line) {
-        List<String> lore = meta.getLore();
+        List<String> lore = this.meta.getLore();
 
         if (lore == null) {
             return lore(line);
@@ -122,7 +145,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addLore(List<String> lines) {
-        List<String> lore = meta.getLore();
+        List<String> lore = this.meta.getLore();
 
         if (lore == null) {
             return lore(lines);
@@ -133,7 +156,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder flags(ItemFlag... flags) {
-        meta.addItemFlags(flags);
+        this.meta.addItemFlags(flags);
         return this;
     }
 
@@ -142,7 +165,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder removeFlags(ItemFlag... flags) {
-        meta.removeItemFlags(flags);
+        this.meta.removeItemFlags(flags);
         return this;
     }
 
@@ -151,11 +174,11 @@ public class ItemBuilder {
     }
 
     public ItemBuilder armorColor(Color color) {
-        return meta(LeatherArmorMeta.class, armorMeta -> armorMeta.setColor(color));
+        return meta(LeatherArmorMeta.class, m -> m.setColor(color));
     }
 
     public ItemStack build() {
-        item.setItemMeta(meta);
-        return item;
+        this.item.setItemMeta(this.meta);
+        return this.item;
     }
 }

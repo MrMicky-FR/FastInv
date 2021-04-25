@@ -1,3 +1,26 @@
+/*
+ * This file is part of FastInv, licensed under the MIT License.
+ *
+ * Copyright (c) 2018-2021 MrMicky
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 package fr.mrmicky.fastinv;
 
 import org.bukkit.Bukkit;
@@ -10,32 +33,32 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
 /**
- * Small and easy Bukkit inventory API with 1.7 to 1.16 support.
- * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>
+ * Lightweight and easy-to-use inventory API for Bukkit plugins.
+ * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author MrMicky
- * @version 3.0
+ * @version 3.0.3
  */
 public class FastInv implements InventoryHolder {
 
     private final Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
+    private final List<Consumer<InventoryOpenEvent>> openHandlers = new ArrayList<>();
+    private final List<Consumer<InventoryCloseEvent>> closeHandlers = new ArrayList<>();
+    private final List<Consumer<InventoryClickEvent>> clickHandlers = new ArrayList<>();
 
-    private Set<Consumer<InventoryOpenEvent>> openHandlers;
-    private Set<Consumer<InventoryCloseEvent>> closeHandlers;
-    private Set<Consumer<InventoryClickEvent>> clickHandlers;
+    private final Inventory inventory;
 
     private Predicate<Player> closeFilter;
-    private Inventory inventory;
 
     /**
      * Create a new FastInv with a custom size.
@@ -62,7 +85,7 @@ public class FastInv implements InventoryHolder {
      * @param type The type of the inventory.
      */
     public FastInv(InventoryType type) {
-        this(type, type.getDefaultTitle());
+        this(Objects.requireNonNull(type, "type"), type.getDefaultTitle());
     }
 
     /**
@@ -72,18 +95,18 @@ public class FastInv implements InventoryHolder {
      * @param title The title of the inventory.
      */
     public FastInv(InventoryType type, String title) {
-        this(0, type, title);
+        this(0, Objects.requireNonNull(type, "type"), title);
     }
 
     private FastInv(int size, InventoryType type, String title) {
         if (type == InventoryType.CHEST && size > 0) {
-            inventory = Bukkit.createInventory(this, size, title);
+            this.inventory = Bukkit.createInventory(this, size, title);
         } else {
-            inventory = Bukkit.createInventory(this, Objects.requireNonNull(type, "type"), title);
+            this.inventory = Bukkit.createInventory(this, type, title);
         }
 
-        if (inventory.getHolder() != this) {
-            throw new IllegalStateException("Inventory holder is not FastInv, found: " + inventory.getHolder());
+        if (this.inventory.getHolder() != this) {
+            throw new IllegalStateException("Inventory holder is not FastInv, found: " + this.inventory.getHolder());
         }
     }
 
@@ -112,7 +135,7 @@ public class FastInv implements InventoryHolder {
      * @param handler The the click handler for the item.
      */
     public void addItem(ItemStack item, Consumer<InventoryClickEvent> handler) {
-        int slot = inventory.firstEmpty();
+        int slot = this.inventory.firstEmpty();
         if (slot >= 0) {
             setItem(slot, item, handler);
         }
@@ -136,12 +159,12 @@ public class FastInv implements InventoryHolder {
      * @param handler The click handler for the item
      */
     public void setItem(int slot, ItemStack item, Consumer<InventoryClickEvent> handler) {
-        inventory.setItem(slot, item);
+        this.inventory.setItem(slot, item);
 
         if (handler != null) {
-            itemHandlers.put(slot, handler);
+            this.itemHandlers.put(slot, handler);
         } else {
-            itemHandlers.remove(slot);
+            this.itemHandlers.remove(slot);
         }
     }
 
@@ -194,17 +217,17 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Remove an {@link ItemStack} from the inventory
+     * Remove an {@link ItemStack} from the inventory.
      *
      * @param slot The slot where to remove the item
      */
     public void removeItem(int slot) {
-        inventory.clear(slot);
-        itemHandlers.remove(slot);
+        this.inventory.clear(slot);
+        this.itemHandlers.remove(slot);
     }
 
     /**
-     * Remove multiples {@link ItemStack} from the inventory
+     * Remove multiples {@link ItemStack} from the inventory.
      *
      * @param slots The slots where to remove the items
      */
@@ -216,7 +239,7 @@ public class FastInv implements InventoryHolder {
 
     /**
      * Add a close filter to prevent players from closing the inventory.
-     * To prevent a player from closing the inventory the predicate should return {@code true}
+     * To prevent a player from closing the inventory the predicate should return {@code true}.
      *
      * @param closeFilter The close filter
      */
@@ -230,10 +253,7 @@ public class FastInv implements InventoryHolder {
      * @param openHandler The handler to add.
      */
     public void addOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
-        if (openHandlers == null) {
-            openHandlers = new HashSet<>();
-        }
-        openHandlers.add(openHandler);
+        this.openHandlers.add(openHandler);
     }
 
     /**
@@ -242,10 +262,7 @@ public class FastInv implements InventoryHolder {
      * @param closeHandler The handler to add
      */
     public void addCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
-        if (closeHandlers == null) {
-            closeHandlers = new HashSet<>();
-        }
-        closeHandlers.add(closeHandler);
+        this.closeHandlers.add(closeHandler);
     }
 
     /**
@@ -254,10 +271,7 @@ public class FastInv implements InventoryHolder {
      * @param clickHandler The handler to add.
      */
     public void addClickHandler(Consumer<InventoryClickEvent> clickHandler) {
-        if (clickHandlers == null) {
-            clickHandlers = new HashSet<>();
-        }
-        clickHandlers.add(clickHandler);
+        this.clickHandlers.add(clickHandler);
     }
 
     /**
@@ -266,16 +280,16 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
-        player.openInventory(inventory);
+        player.openInventory(this.inventory);
     }
 
     /**
-     * Get borders of the inventory. If the inventory size is under 27, all slots are returned
+     * Get borders of the inventory. If the inventory size is under 27, all slots are returned.
      *
      * @return inventory borders
      */
     public int[] getBorders() {
-        int size = inventory.getSize();
+        int size = this.inventory.getSize();
         return IntStream.range(0, size).filter(i -> size < 27 || i < 9 || i % 9 == 0 || (i - 8) % 9 == 0 || i > size - 9).toArray();
     }
 
@@ -285,46 +299,40 @@ public class FastInv implements InventoryHolder {
      * @return inventory corners
      */
     public int[] getCorners() {
-        int size = inventory.getSize();
+        int size = this.inventory.getSize();
         return IntStream.range(0, size).filter(i -> i < 2 || (i > 6 && i < 10) || i == 17 || i == size - 18 || (i > size - 11 && i < size - 7) || i > size - 3).toArray();
     }
 
     /**
-     * Get the Bukkit inventory
+     * Get the Bukkit inventory.
      *
      * @return The Bukkit inventory.
      */
     @Override
     public Inventory getInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     void handleOpen(InventoryOpenEvent e) {
         onOpen(e);
 
-        if (openHandlers != null) {
-            openHandlers.forEach(c -> c.accept(e));
-        }
+        this.openHandlers.forEach(c -> c.accept(e));
     }
 
     boolean handleClose(InventoryCloseEvent e) {
         onClose(e);
 
-        if (closeHandlers != null) {
-            closeHandlers.forEach(c -> c.accept(e));
-        }
+        this.closeHandlers.forEach(c -> c.accept(e));
 
-        return closeFilter != null && closeFilter.test((Player) e.getPlayer());
+        return this.closeFilter != null && this.closeFilter.test((Player) e.getPlayer());
     }
 
     void handleClick(InventoryClickEvent e) {
         onClick(e);
 
-        if (clickHandlers != null) {
-            clickHandlers.forEach(c -> c.accept(e));
-        }
+        this.clickHandlers.forEach(c -> c.accept(e));
 
-        Consumer<InventoryClickEvent> clickConsumer = itemHandlers.get(e.getRawSlot());
+        Consumer<InventoryClickEvent> clickConsumer = this.itemHandlers.get(e.getRawSlot());
 
         if (clickConsumer != null) {
             clickConsumer.accept(e);
