@@ -1,13 +1,13 @@
 # FastInv
 [![JitPack](https://jitpack.io/v/fr.mrmicky/FastInv.svg)](https://jitpack.io/#fr.mrmicky/FastInv)
-[![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=7289da&label=discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
+[![Discord](https://img.shields.io/discord/390919659874156560.svg?colorB=5865f2&label=Discord&logo=discord&logoColor=white)](https://discord.gg/q9UwaBT)
 
 Lightweight and easy-to-use inventory API for Bukkit plugins.
 
 ## Features
 * Very small (less than 400 lines of code with the JavaDoc) and no dependencies
-* Works with all Bukkit versions from 1.7.10 to 1.16.
-* Supports custom inventories (size, title and type).
+* Works with all Bukkit versions from 1.7.10 to 1.17.
+* Supports custom inventories (size, title and type)
 * Easy to use
 * Option to prevent a player from closing the inventory
 * The Bukkit inventory can still be directly used
@@ -42,16 +42,14 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
         </plugin>
     </plugins>
 </build>
-```
-```xml
+
 <repositories>
     <repository>
         <id>jitpack.io</id>
         <url>https://jitpack.io</url>
     </repository>
 </repositories>
-```
-```xml
+
 <dependencies>
     <dependency>
         <groupId>fr.mrmicky</groupId>
@@ -66,18 +64,15 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 plugins {
     id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
-```
-```groovy
+
 repositories {
     maven { url 'https://jitpack.io' }
 }
-```
-```groovy
+
 dependencies {
     implementation 'fr.mrmicky:FastInv:3.0.3'
 }
-```
-```groovy
+
 shadowJar {
     // Replace 'com.yourpackage' with the package of your plugin 
     relocate 'fr.mrmicky.fastinv', 'com.yourpackage.fastinv'
@@ -103,7 +98,7 @@ public void onEnable() {
 ### Creating an inventory class
 
 Now you can create an inventory by make a class that extends `FastInv`, and add items in the constructor. 
-You can also override `onClick`, `onClose` and `onOpen` if you need
+You can also override `onClick`, `onClose` and `onOpen` if you need.
 
 Small example inventory:
 
