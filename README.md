@@ -6,7 +6,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 
 ## Features
 * Very small (less than 400 lines of code with the JavaDoc) and no dependencies
-* Works with all Bukkit versions from 1.7.10 to 1.17.
+* Works with all Bukkit versions from 1.7.10 to 1.19
 * Supports custom inventories (size, title and type)
 * Easy to use
 * Option to prevent a player from closing the inventory
@@ -21,7 +21,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.4</version>
+            <version>3.3.0<</version>
             <executions>
                 <execution>
                     <phase>package</phase>
@@ -62,7 +62,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 ### Gradle
 ```groovy
 plugins {
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
 repositories {
@@ -81,7 +81,7 @@ shadowJar {
 
 ### Manual
 
-Just copy `FastInv.java` and `FastInvManager.java` in your plugin.
+Simply copy `FastInv.java` and `FastInvManager.java` in your plugin.
 You can also add `ItemBuilder.java` if you need.
 
 ## Usage
@@ -159,7 +159,7 @@ new ExampleInventory().open(player);
 ```
 
 ### Creating a 'compact' inventory
-If you prefer you can create a 'compact' inventory that doesn't require an entire class, but this is not recommended.
+If you prefer, you can create a 'compact' inventory that doesn't require an entire class, but this is not recommended.
 
 ```java
 FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");
