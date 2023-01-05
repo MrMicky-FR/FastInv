@@ -38,14 +38,17 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- * Simple {@link ItemStack} builder
+ * Simple {@link ItemStack} builder.
  *
  * @author MrMicky
  */
 public class ItemBuilder {
 
     private final ItemStack item;
-    private final ItemMeta meta;
+
+    public static ItemBuilder copyOf(ItemStack item) {
+        return new ItemBuilder(item.clone());
+    }
 
     public ItemBuilder(Material material) {
         this(new ItemStack(material));
@@ -53,16 +56,34 @@ public class ItemBuilder {
 
     public ItemBuilder(ItemStack item) {
         this.item = Objects.requireNonNull(item, "item");
-        this.meta = item.getItemMeta();
+    }
 
-        if (this.meta == null) {
-            throw new IllegalArgumentException("The type " + item.getType() + " doesn't support item meta");
-        }
+    public ItemBuilder edit(Consumer<ItemStack> function) {
+        function.accept(this.item);
+        return this;
+    }
+
+    public ItemBuilder meta(Consumer<ItemMeta> metaConsumer) {
+        return edit(item -> {
+            ItemMeta meta = item.getItemMeta();
+
+            if (meta != null) {
+                metaConsumer.accept(meta);
+                item.setItemMeta(meta);
+            }
+        });
+    }
+
+    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
+        return meta(meta -> {
+            if (metaClass.isInstance(meta)) {
+                metaConsumer.accept(metaClass.cast(meta));
+            }
+        });
     }
 
     public ItemBuilder type(Material material) {
-        this.item.setType(material);
-        return this;
+        return edit(item -> item.setType(material));
     }
 
     public ItemBuilder data(int data) {
@@ -71,13 +92,11 @@ public class ItemBuilder {
 
     @SuppressWarnings("deprecation")
     public ItemBuilder durability(short durability) {
-        this.item.setDurability(durability);
-        return this;
+        return edit(item -> item.setDurability(durability));
     }
 
     public ItemBuilder amount(int amount) {
-        this.item.setAmount(amount);
-        return this;
+        return edit(item -> item.setAmount(amount));
     }
 
     public ItemBuilder enchant(Enchantment enchantment) {
@@ -85,35 +104,19 @@ public class ItemBuilder {
     }
 
     public ItemBuilder enchant(Enchantment enchantment, int level) {
-        this.meta.addEnchant(enchantment, level, true);
-        return this;
+        return meta(meta -> meta.addEnchant(enchantment, level, true));
     }
 
     public ItemBuilder removeEnchant(Enchantment enchantment) {
-        this.meta.removeEnchant(enchantment);
-        return this;
+        return meta(meta -> meta.removeEnchant(enchantment));
     }
 
     public ItemBuilder removeEnchants() {
-        this.meta.getEnchants().keySet().forEach(this.meta::removeEnchant);
-        return this;
-    }
-
-    public ItemBuilder meta(Consumer<ItemMeta> metaConsumer) {
-        metaConsumer.accept(this.meta);
-        return this;
-    }
-
-    public <T extends ItemMeta> ItemBuilder meta(Class<T> metaClass, Consumer<T> metaConsumer) {
-        if (metaClass.isInstance(this.meta)) {
-            metaConsumer.accept(metaClass.cast(this.meta));
-        }
-        return this;
+        return meta(m -> m.getEnchants().keySet().forEach(m::removeEnchant));
     }
 
     public ItemBuilder name(String name) {
-        this.meta.setDisplayName(name);
-        return this;
+        return meta(meta -> meta.setDisplayName(name));
     }
 
     public ItemBuilder lore(String lore) {
@@ -125,19 +128,21 @@ public class ItemBuilder {
     }
 
     public ItemBuilder lore(List<String> lore) {
-        this.meta.setLore(lore);
-        return this;
+        return meta(meta -> meta.setLore(lore));
     }
 
     public ItemBuilder addLore(String line) {
-        List<String> lore = this.meta.getLore();
+        return meta(meta -> {
+            List<String> lore = meta.getLore();
 
-        if (lore == null) {
-            return lore(line);
-        }
+            if (lore == null) {
+                meta.setLore(Collections.singletonList(line));
+                return;
+            }
 
-        lore.add(line);
-        return lore(lore);
+            lore.add(line);
+            meta.setLore(lore);
+        });
     }
 
     public ItemBuilder addLore(String... lines) {
@@ -145,19 +150,21 @@ public class ItemBuilder {
     }
 
     public ItemBuilder addLore(List<String> lines) {
-        List<String> lore = this.meta.getLore();
+        return meta(meta -> {
+            List<String> lore = meta.getLore();
 
-        if (lore == null) {
-            return lore(lines);
-        }
+            if (lore == null) {
+                meta.setLore(lines);
+                return;
+            }
 
-        lore.addAll(lines);
-        return lore(lore);
+            lore.addAll(lines);
+            meta.setLore(lore);
+        });
     }
 
     public ItemBuilder flags(ItemFlag... flags) {
-        this.meta.addItemFlags(flags);
-        return this;
+        return meta(meta -> meta.addItemFlags(flags));
     }
 
     public ItemBuilder flags() {
@@ -165,8 +172,7 @@ public class ItemBuilder {
     }
 
     public ItemBuilder removeFlags(ItemFlag... flags) {
-        this.meta.removeItemFlags(flags);
-        return this;
+        return meta(meta -> meta.removeItemFlags(flags));
     }
 
     public ItemBuilder removeFlags() {
@@ -174,11 +180,10 @@ public class ItemBuilder {
     }
 
     public ItemBuilder armorColor(Color color) {
-        return meta(LeatherArmorMeta.class, m -> m.setColor(color));
+        return meta(LeatherArmorMeta.class, meta -> meta.setColor(color));
     }
 
     public ItemStack build() {
-        this.item.setItemMeta(this.meta);
         return this.item;
     }
 }
