@@ -50,7 +50,7 @@ public class ItemBuilder {
 
     public ItemBuilder(ItemStack item) {
         this.initialItem = Objects.requireNonNull(item, "item");
-        this.actions = new LinkedList<>();
+        this.actions = new ArrayList<>();
     }
 
     public ItemBuilder edit(Consumer<ItemStack> action) {
