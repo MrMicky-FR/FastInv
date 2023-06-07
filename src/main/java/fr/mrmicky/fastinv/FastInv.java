@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
@@ -47,7 +48,7 @@ import java.util.stream.IntStream;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author MrMicky
- * @version 3.0.3
+ * @version 3.0.4
  */
 public class FastInv implements InventoryHolder {
 
@@ -66,7 +67,7 @@ public class FastInv implements InventoryHolder {
      * @param size The size of the inventory.
      */
     public FastInv(int size) {
-        this(size, InventoryType.CHEST.getDefaultTitle());
+        this(owner -> Bukkit.createInventory(owner, size));
     }
 
     /**
@@ -76,7 +77,7 @@ public class FastInv implements InventoryHolder {
      * @param title The title (name) of the inventory.
      */
     public FastInv(int size, String title) {
-        this(size, InventoryType.CHEST, title);
+        this(owner -> Bukkit.createInventory(owner, size, title));
     }
 
     /**
@@ -85,7 +86,7 @@ public class FastInv implements InventoryHolder {
      * @param type The type of the inventory.
      */
     public FastInv(InventoryType type) {
-        this(Objects.requireNonNull(type, "type"), type.getDefaultTitle());
+        this(owner -> Bukkit.createInventory(owner, type));
     }
 
     /**
@@ -95,19 +96,18 @@ public class FastInv implements InventoryHolder {
      * @param title The title of the inventory.
      */
     public FastInv(InventoryType type, String title) {
-        this(0, Objects.requireNonNull(type, "type"), title);
+        this(owner -> Bukkit.createInventory(owner, type, title));
     }
 
-    private FastInv(int size, InventoryType type, String title) {
-        if (type == InventoryType.CHEST && size > 0) {
-            this.inventory = Bukkit.createInventory(this, size, title);
-        } else {
-            this.inventory = Bukkit.createInventory(this, type, title);
+    public FastInv(Function<InventoryHolder, Inventory> inventoryFunction) {
+        Objects.requireNonNull(inventoryFunction, "inventoryFunction");
+        Inventory inv = inventoryFunction.apply(this);
+
+        if (inv.getHolder() != this) {
+            throw new IllegalStateException("Inventory holder is not FastInv, found: " + inv.getHolder());
         }
 
-        if (this.inventory.getHolder() != this) {
-            throw new IllegalStateException("Inventory holder is not FastInv, found: " + this.inventory.getHolder());
-        }
+        this.inventory = inv;
     }
 
     protected void onOpen(InventoryOpenEvent event) {
@@ -132,7 +132,7 @@ public class FastInv implements InventoryHolder {
      * Add an {@link ItemStack} to the inventory on the first empty slot with a click handler.
      *
      * @param item    The item to add.
-     * @param handler The the click handler for the item.
+     * @param handler The click handler for the item.
      */
     public void addItem(ItemStack item, Consumer<InventoryClickEvent> handler) {
         int slot = this.inventory.firstEmpty();
@@ -290,7 +290,8 @@ public class FastInv implements InventoryHolder {
      */
     public int[] getBorders() {
         int size = this.inventory.getSize();
-        return IntStream.range(0, size).filter(i -> size < 27 || i < 9 || i % 9 == 0 || (i - 8) % 9 == 0 || i > size - 9).toArray();
+        return IntStream.range(0, size).filter(i -> size < 27 || i < 9
+                || i % 9 == 0 || (i - 8) % 9 == 0 || i > size - 9).toArray();
     }
 
     /**
@@ -300,7 +301,9 @@ public class FastInv implements InventoryHolder {
      */
     public int[] getCorners() {
         int size = this.inventory.getSize();
-        return IntStream.range(0, size).filter(i -> i < 2 || (i > 6 && i < 10) || i == 17 || i == size - 18 || (i > size - 11 && i < size - 7) || i > size - 3).toArray();
+        return IntStream.range(0, size).filter(i -> i < 2 || (i > 6 && i < 10)
+                || i == 17 || i == size - 18
+                || (i > size - 11 && i < size - 7) || i > size - 3).toArray();
     }
 
     /**

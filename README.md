@@ -6,7 +6,8 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 
 ## Features
 * Very small (less than 400 lines of code with the JavaDoc) and no dependencies
-* Works with all Bukkit versions from 1.7.10 to 1.19
+* Works with all Bukkit/Spigot/Paper versions from 1.7.10 to 1.20
+* Simple [Adventure components support](#adventure-components-support)
 * Supports custom inventories (size, title and type)
 * Easy to use
 * Option to prevent a player from closing the inventory
@@ -54,7 +55,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
     <dependency>
         <groupId>fr.mrmicky</groupId>
         <artifactId>FastInv</artifactId>
-        <version>3.0.3</version>
+        <version>3.0.4</version>
     </dependency>
 </dependencies>
 ```
@@ -70,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'fr.mrmicky:FastInv:3.0.3'
+    implementation 'fr.mrmicky:FastInv:3.0.4'
 }
 
 shadowJar {
@@ -176,4 +177,13 @@ You can easily get the FastInv instance from a Bukkit inventory with the holder:
 if (inventory.getHolder() instanceof FastInv) {
     FastInv fastInv = (FastInv) inventory.getHolder();
 }
+```
+
+### Adventure components support
+
+FastInv supports [Adventure components](https://github.com/KyoriPowered/adventure) for inventory titles on [PaperMC](https://papermc.io/) servers:
+```java
+Component title = Component.text("Hello World");
+
+FastInv inv = new FastInv(owner -> Bukkit.createInventory(owner, 27, title));
 ```
