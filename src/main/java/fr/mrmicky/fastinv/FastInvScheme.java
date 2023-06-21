@@ -108,7 +108,7 @@ public class FastInvScheme extends FastInv {
     public Inventory getInventory() {
         int slot = 0;
         for (String nextMask : maskList) {
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 9; i++) {
                 try {
                     final Character character = nextMask.charAt(i);
                     final Pair<ItemStack, Consumer<InventoryClickEvent>> pair = schemeItems.get(character);
