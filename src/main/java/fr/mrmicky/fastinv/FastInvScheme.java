@@ -108,7 +108,8 @@ public class FastInvScheme extends FastInv {
     public Inventory getInventory() {
         int slot = 0;
         for (String nextMask : maskList) {
-            for (int i = 0; i < 9; i++) {
+            for (int i = 0; i <= 8; i++) {
+
                 try {
                     final Character character = nextMask.charAt(i);
                     final Pair<ItemStack, Consumer<InventoryClickEvent>> pair = schemeItems.get(character);
@@ -117,9 +118,9 @@ public class FastInvScheme extends FastInv {
                     }
                 } catch (IndexOutOfBoundsException ignored) {
                     // mean mask's length is greater than 9 characters. Shouldn't happen, can be ignored.
-                } finally {
-                    slot++;
                 }
+
+                slot++;
             }
         }
         return super.getInventory();
