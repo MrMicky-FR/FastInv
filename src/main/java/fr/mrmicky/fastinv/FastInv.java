@@ -280,7 +280,7 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
-        player.openInventory(this.inventory);
+        player.openInventory(this.getInventory());
     }
 
     /**
