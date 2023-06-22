@@ -39,17 +39,12 @@ public class FastInvScheme extends FastInv {
     }
 
     private static final class Pair<A, B> {
-
         public final A fst;
         public final B snd;
 
         public Pair(A fst, B snd) {
             this.fst = fst;
             this.snd = snd;
-        }
-
-        public String toString() {
-            return "Pair[" + fst + "," + snd + "]";
         }
     }
 
@@ -93,13 +88,23 @@ public class FastInvScheme extends FastInv {
         maskList.clear();
     }
 
-    public void setSchemeItem(Character character, ItemStack item, Consumer<InventoryClickEvent> consumer) {
+    /**
+     * Bind character to the corresponding itemstack in the inventory.
+     * @param character not nullable character. Example: '4'
+     * @param item not nullable itemstack to be binded with the character
+     * @param consumer nullable consumer for the item
+     */
+    public void bindItem(Character character, ItemStack item, Consumer<InventoryClickEvent> consumer) {
         Objects.requireNonNull(character);
         Objects.requireNonNull(item);
         schemeItems.put(Character.toLowerCase(character), new Pair<>(item, consumer));
     }
 
-    public void removeSchemeItem(Character character) {
+    /**
+     * Unbind any item from this character.
+     * @param character not nullable character
+     */
+    public void unbindItem(Character character) {
         Objects.requireNonNull(character);
         schemeItems.remove(character);
     }
@@ -109,7 +114,6 @@ public class FastInvScheme extends FastInv {
         int slot = 0;
         for (String nextMask : maskList) {
             for (int i = 0; i <= 8; i++) {
-
                 try {
                     final Character character = nextMask.charAt(i);
                     final Pair<ItemStack, Consumer<InventoryClickEvent>> pair = schemeItems.get(character);
@@ -119,7 +123,6 @@ public class FastInvScheme extends FastInv {
                 } catch (IndexOutOfBoundsException ignored) {
                     // mean mask's length is greater than 9 characters. Shouldn't happen, can be ignored.
                 }
-
                 slot++;
             }
         }
