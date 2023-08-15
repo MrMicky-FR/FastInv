@@ -275,6 +275,54 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Remove a handler to handle inventory open.
+     *
+     * @param openHandler The handler to remove.
+     */
+    public void removeOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
+        this.openHandlers.remove(openHandler);
+    }
+
+    /**
+     * Remove a handler to handle inventory close.
+     *
+     * @param closeHandler The handler to remove
+     */
+    public void removeCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
+        this.closeHandlers.remove(closeHandler);
+    }
+
+    /**
+     * Remove a handler to handle inventory click.
+     *
+     * @param clickHandler The handler to remove.
+     */
+    public void removeClickHandler(Consumer<InventoryClickEvent> clickHandler) {
+        this.clickHandlers.remove(clickHandler);
+    }
+
+    /**
+     * Clear handlers of inventory open.
+     */
+    public void clearOpenHandler() {
+        this.openHandlers.clear();
+    }
+
+    /**
+     * Clear handlers of inventory close.
+     */
+    public void clearCloseHandler() {
+        this.closeHandlers.clear();
+    }
+
+    /**
+     * Clear handlers of inventory click.
+     */
+    public void clearClickHandler() {
+        this.clickHandlers.clear();
+    }
+
+    /**
      * Open the inventory to a player.
      *
      * @param player The player to open the menu.
