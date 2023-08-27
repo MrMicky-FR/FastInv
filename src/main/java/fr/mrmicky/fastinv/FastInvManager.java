@@ -85,8 +85,8 @@ public final class FastInvManager {
 
         @EventHandler
         public void onInventoryClick(InventoryClickEvent e) {
-            if (e.getInventory().getHolder() instanceof FastInv && e.getClickedInventory() != null) {
-                FastInv inv = (FastInv) e.getInventory().getHolder();
+            if (e.getClickedInventory() != null && e.getClickedInventory().getHolder() instanceof FastInv) {
+                FastInv inv = (FastInv) e.getClickedInventory().getHolder();
 
                 boolean wasCancelled = e.isCancelled();
                 e.setCancelled(true);
