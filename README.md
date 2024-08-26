@@ -12,6 +12,8 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 * Easy to use
 * Option to prevent a player from closing the inventory
 * The Bukkit inventory can still be directly used
+* Paginated inventory for easy display of lists
+* Keep your inventory animated at a predefined rate
 
 ## Installation
 
@@ -101,6 +103,8 @@ public void onEnable() {
 Now you can create an inventory by make a class that extends `FastInv`, and add items in the constructor. 
 You can also override `onClick`, `onClose` and `onOpen` if you need.
 
+*If you want to create an animated inventory, you need to add elements inside the `redraw` override method and not in the constructor, so that they are updated.
+
 Small example inventory:
 
 ```java
@@ -168,6 +172,64 @@ FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");
 inv.setItem(4, new ItemStack(Material.NAME_TAG), e -> e.getWhoClicked().sendMessage("You clicked on the name tag"));
 inv.addClickHandler(e -> player.sendMessage("You clicked on slot " + e.getSlot()));
 inv.addCloseHandler(e -> player.sendMessage(ChatColor.YELLOW + "Inventory closed"));
+inv.open(player);
+```
+
+### Creating a 'paginated' inventory
+If you wish to display a list of content across multiple pages, you can create a paginated inventory. Here's how:
+
+```java
+public class PaginatedExample<T> extends PaginatedFastInv<T> {
+    private static final Integer[] SLOTS = {
+            10, 11, 12, 13, 14, 15, 16,
+            19, 20, 21, 22, 23, 24, 25,
+            28, 29, 30, 31, 32, 33, 34,
+            37, 38, 39, 40, 41, 42, 43
+    };
+
+    public PaginatedExample(Supplier<List<T>> contents) {
+        super(contents /* <-- your contents supplier */, 9 * 6, "Example paginated inventory");
+    }
+
+    @Override
+    public List<Integer> contentSlots() {
+        return Arrays.asList(SLOTS);
+    }
+
+    @Override
+    public PaginatedItem getPrevPageItem() {
+        return new PaginatedItem(48, (player, page) -> new ItemBuilder(Material.ARROW)
+                .name("<--")
+                .addLore("Switch to the previous page.")
+                .addLore("Currently viewing page " + page.current() + "/" + page.maxPages())
+                .build());
+    }
+
+    @Override
+    public PaginatedItem getNextPageItem() {
+        return new PaginatedItem(50, (player, page) -> new ItemBuilder(Material.ARROW)
+                .name("-->")
+                .addLore("Switch to the following page.")
+                .addLore("Currently viewing page " + page.current() + "/" + page.maxPages())
+                .build());
+    }
+
+    @Override
+    public void setItem(int slot, Player viewer, T entity) {
+        setItem(slot, new ItemBuilder(Material.STONE).name(entity.toString()).build(), e -> {
+            // action executed when the player clicks on the element
+        });
+    }
+}
+```
+
+### Animate your inventory
+Here's how you can schedule the animation at a fixed rate of 20 ticks (1 second) between each draw:
+
+```java
+FastInv inv = new FastInv(InventoryType.DISPENSER, "Example compact inventory");
+        
+inv.animate(plugin, 20L, 20L);
 inv.open(player);
 ```
 

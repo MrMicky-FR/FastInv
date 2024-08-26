@@ -32,6 +32,9 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,7 +51,7 @@ import java.util.stream.IntStream;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author MrMicky
- * @version 3.0.4
+ * @version 3.0.5
  */
 public class FastInv implements InventoryHolder {
 
@@ -60,6 +63,9 @@ public class FastInv implements InventoryHolder {
     private final Inventory inventory;
 
     private Predicate<Player> closeFilter;
+
+    // Animation task instance used to cancel the animation loop and inventory close
+    private BukkitTask animationTask = null;
 
     /**
      * Create a new FastInv with a custom size.
@@ -110,6 +116,15 @@ public class FastInv implements InventoryHolder {
         this.inventory = inv;
     }
 
+    /**
+     * Method use to draw inventory content, this is the method used to refresh inventory content
+     * when you animate it using the {@link #animate(Plugin, long, long)} method.
+     *
+     * @param viewer of the current inventory
+     */
+    public void redraw(Player viewer) {
+    }
+
     protected void onOpen(InventoryOpenEvent event) {
     }
 
@@ -117,6 +132,32 @@ public class FastInv implements InventoryHolder {
     }
 
     protected void onClose(InventoryCloseEvent event) {
+    }
+
+    public void animate(Plugin plugin) {
+        animate(plugin, 20L);
+    }
+
+    public void animate(Plugin plugin, long period) {
+        animate(plugin, period, period);
+    }
+
+    public void animate(Plugin plugin, long delay, long period) {
+        if (this.animationTask != null) {
+            throw new IllegalStateException("This inventory is already animated");
+        }
+        addOpenHandler(e -> this.animationTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                redraw((Player) e.getPlayer());
+            }
+        }.runTaskTimer(plugin, delay, period));
+        addCloseHandler(e -> {
+            if (this.animationTask != null) {
+                this.animationTask.cancel();
+                this.animationTask = null;
+            }
+        });
     }
 
     /**
@@ -280,6 +321,7 @@ public class FastInv implements InventoryHolder {
      * @param player The player to open the menu.
      */
     public void open(Player player) {
+        redraw(player);
         player.openInventory(this.inventory);
     }
 
