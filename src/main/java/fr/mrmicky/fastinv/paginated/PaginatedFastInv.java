@@ -16,6 +16,8 @@ import java.util.function.Function;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author kubbidev
+ * @implNote Maybe make another version with the {@link java.util.function.Supplier}
+ * in the constructors for content list.
  * @version 1.0.1
  */
 public abstract class PaginatedFastInv<T> extends FastInv {
@@ -47,9 +49,10 @@ public abstract class PaginatedFastInv<T> extends FastInv {
     /**
      * Gets a list containing all pages item, different from the actual page items.
      *
+     * @param viewer of the current inventory
      * @return a {@link List} of {@link T} objects.
      */
-    public abstract List<T> contents();
+    public abstract List<T> contents(Player viewer);
 
     /**
      * Retrieves a list of integers representing the slot indices
@@ -64,18 +67,18 @@ public abstract class PaginatedFastInv<T> extends FastInv {
         return this.firstDraw;
     }
 
-    protected PaginatedItem getPrevPageItem() {
+    public PaginatedItem getPrevPageItem() {
         return null;
     }
 
-    protected PaginatedItem getNextPageItem() {
+    public PaginatedItem getNextPageItem() {
         return null;
     }
 
     @Override
     public void redraw(Player viewer) {
         List<Integer> slots = new ArrayList<>(contentSlots());
-        List<List<T>> pages = Lists.partition(contents(), slots.size());
+        List<List<T>> pages = Lists.partition(contents(viewer), slots.size());
 
         PaginatedInfo info = new PaginatedInfo(this.page, pages.size());
         normalizePage(info.maxPages());

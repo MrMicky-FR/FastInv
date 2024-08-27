@@ -57,7 +57,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
     <dependency>
         <groupId>fr.mrmicky</groupId>
         <artifactId>FastInv</artifactId>
-        <version>3.0.4</version>
+        <version>3.0.5</version>
     </dependency>
 </dependencies>
 ```
@@ -73,7 +73,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'fr.mrmicky:FastInv:3.0.4'
+    implementation 'fr.mrmicky:FastInv:3.0.5'
 }
 
 shadowJar {
@@ -187,8 +187,13 @@ public class PaginatedExample<T> extends PaginatedFastInv<T> {
             37, 38, 39, 40, 41, 42, 43
     };
 
-    public PaginatedExample(Supplier<List<T>> contents) {
-        super(contents /* <-- your contents supplier */, 9 * 6, "Example paginated inventory");
+    public PaginatedExample() {
+        super(54, "Example paginated inventory");
+    }
+    
+    @Override
+    public List<T> contents(Player viewer) {
+        return /* Your content list */;
     }
 
     @Override
