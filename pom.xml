@@ -6,7 +6,7 @@
 
     <groupId>fr.mrmicky</groupId>
     <artifactId>fastinv</artifactId>
-    <version>3.0.5</version>
+    <version>3.0.6</version>
 
     <name>FastInv</name>
     <description>Lightweight and easy-to-use inventory API for Bukkit plugins.</description>

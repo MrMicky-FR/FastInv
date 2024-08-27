@@ -2,7 +2,6 @@ package fr.mrmicky.fastinv.paginated;
 
 import com.google.common.collect.Lists;
 import fr.mrmicky.fastinv.FastInv;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
@@ -11,43 +10,46 @@ import org.bukkit.inventory.InventoryHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * Lightweight and easy-to-use paginated inventory API for Bukkit plugins.
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author kubbidev
- * @version 1.0.0
+ * @version 1.0.1
  */
 public abstract class PaginatedFastInv<T> extends FastInv {
     private int page = 1;
 
-    private final Supplier<List<T>> contents;
-
     // This remains true until after #redraw is called for the first time
     private boolean firstDraw = true;
 
-    public PaginatedFastInv(Supplier<List<T>> contents, int size) {
-        this(contents, owner -> Bukkit.createInventory(owner, size));
+    public PaginatedFastInv(int size) {
+        super(size);
     }
 
-    public PaginatedFastInv(Supplier<List<T>> contents, int size, String title) {
-        this(contents, owner -> Bukkit.createInventory(owner, size, title));
+    public PaginatedFastInv(int size, String title) {
+        super(size, title);
     }
 
-    public PaginatedFastInv(Supplier<List<T>> contents, InventoryType type) {
-        this(contents, owner -> Bukkit.createInventory(owner, type));
+    public PaginatedFastInv(InventoryType type) {
+        super(type);
     }
 
-    public PaginatedFastInv(Supplier<List<T>> contents, InventoryType type, String title) {
-        this(contents, owner -> Bukkit.createInventory(owner, type, title));
+    public PaginatedFastInv(InventoryType type, String title) {
+        super(type, title);
     }
 
-    public PaginatedFastInv(Supplier<List<T>> contents, Function<InventoryHolder, Inventory> inventoryFunction) {
+    public PaginatedFastInv(Function<InventoryHolder, Inventory> inventoryFunction) {
         super(inventoryFunction);
-        this.contents = contents;
     }
+
+    /**
+     * Gets a list containing all pages item, different from the actual page items.
+     *
+     * @return a {@link List} of {@link T} objects.
+     */
+    public abstract List<T> contents();
 
     /**
      * Retrieves a list of integers representing the slot indices
@@ -73,7 +75,7 @@ public abstract class PaginatedFastInv<T> extends FastInv {
     @Override
     public void redraw(Player viewer) {
         List<Integer> slots = new ArrayList<>(contentSlots());
-        List<List<T>> pages = Lists.partition(this.contents.get(), slots.size());
+        List<List<T>> pages = Lists.partition(contents(), slots.size());
 
         PaginatedInfo info = new PaginatedInfo(this.page, pages.size());
         normalizePage(info.maxPages());
