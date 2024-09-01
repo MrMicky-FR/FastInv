@@ -33,11 +33,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,7 +44,7 @@ import java.util.stream.IntStream;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author MrMicky
- * @version 3.0.4
+ * @version 3.1.0
  */
 public class FastInv implements InventoryHolder {
 
@@ -64,7 +60,8 @@ public class FastInv implements InventoryHolder {
     /**
      * Create a new FastInv with a custom size.
      *
-     * @param size The size of the inventory.
+     * @param size a multiple of 9 as the size of the inventory
+     * @see Bukkit#createInventory(InventoryHolder, int)
      */
     public FastInv(int size) {
         this(owner -> Bukkit.createInventory(owner, size));
@@ -73,8 +70,9 @@ public class FastInv implements InventoryHolder {
     /**
      * Create a new FastInv with a custom size and title.
      *
-     * @param size  The size of the inventory.
-     * @param title The title (name) of the inventory.
+     * @param size  a multiple of 9 as the size of the inventory
+     * @param title the title (name) of the inventory
+     * @see Bukkit#createInventory(InventoryHolder, int, String)
      */
     public FastInv(int size, String title) {
         this(owner -> Bukkit.createInventory(owner, size, title));
@@ -83,7 +81,8 @@ public class FastInv implements InventoryHolder {
     /**
      * Create a new FastInv with a custom type.
      *
-     * @param type The type of the inventory.
+     * @param type the type of the inventory
+     * @see Bukkit#createInventory(InventoryHolder, InventoryType)
      */
     public FastInv(InventoryType type) {
         this(owner -> Bukkit.createInventory(owner, type));
@@ -92,14 +91,15 @@ public class FastInv implements InventoryHolder {
     /**
      * Create a new FastInv with a custom type and title.
      *
-     * @param type  The type of the inventory.
-     * @param title The title of the inventory.
+     * @param type  the type of the inventory
+     * @param title the title of the inventory
+     * @see Bukkit#createInventory(InventoryHolder, InventoryType, String)
      */
     public FastInv(InventoryType type, String title) {
         this(owner -> Bukkit.createInventory(owner, type, title));
     }
 
-    public FastInv(Function<InventoryHolder, Inventory> inventoryFunction) {
+    public FastInv(Function<FastInv, Inventory> inventoryFunction) {
         Objects.requireNonNull(inventoryFunction, "inventoryFunction");
         Inventory inv = inventoryFunction.apply(this);
 
@@ -110,19 +110,34 @@ public class FastInv implements InventoryHolder {
         this.inventory = inv;
     }
 
+    /**
+     * Called when the inventory is opened.
+     *
+     * @param event the InventoryOpenEvent that triggered this method
+     */
     protected void onOpen(InventoryOpenEvent event) {
     }
 
+    /**
+     * Called when the inventory is clicked.
+     *
+     * @param event the InventoryClickEvent that triggered this method
+     */
     protected void onClick(InventoryClickEvent event) {
     }
 
+    /**
+     * Called when the inventory is closed.
+     *
+     * @param event the InventoryCloseEvent that triggered this method
+     */
     protected void onClose(InventoryCloseEvent event) {
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on the first empty slot.
+     * Add an {@link ItemStack} to the inventory on the first empty slot, with no click handler.
      *
-     * @param item The ItemStack to add
+     * @param item the item to add
      */
     public void addItem(ItemStack item) {
         addItem(item, null);
@@ -131,8 +146,8 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on the first empty slot with a click handler.
      *
-     * @param item    The item to add.
-     * @param handler The click handler for the item.
+     * @param item    the item to add.
+     * @param handler the click handler associated to this item
      */
     public void addItem(ItemStack item, Consumer<InventoryClickEvent> handler) {
         int slot = this.inventory.firstEmpty();
@@ -142,7 +157,7 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on a specific slot.
+     * Add an {@link ItemStack} to the inventory on a specific slot, with no click handler.
      *
      * @param slot The slot where to add the item.
      * @param item The item to add.
@@ -154,9 +169,9 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on specific slot with a click handler.
      *
-     * @param slot    The slot where to add the item.
-     * @param item    The item to add.
-     * @param handler The click handler for the item
+     * @param slot    the slot where to add the item
+     * @param item    the item to add.
+     * @param handler the click handler associated to this item
      */
     public void setItem(int slot, ItemStack item, Consumer<InventoryClickEvent> handler) {
         this.inventory.setItem(slot, item);
@@ -169,10 +184,10 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on a range of slots.
+     * Add an {@link ItemStack} to the inventory on a range of slots, with no click handler.
      *
-     * @param slotFrom Starting slot to add the item in.
-     * @param slotTo   Ending slot to add the item in.
+     * @param slotFrom starting slot (inclusive) to put the item in
+     * @param slotTo   ending slot (exclusive) to put the item in
      * @param item     The item to add.
      */
     public void setItems(int slotFrom, int slotTo, ItemStack item) {
@@ -182,22 +197,22 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on a range of slots with a click handler.
      *
-     * @param slotFrom Starting slot to put the item in.
-     * @param slotTo   Ending slot to put the item in.
-     * @param item     The item to add.
-     * @param handler  The click handler for the item
+     * @param slotFrom starting slot (inclusive) to put the item in
+     * @param slotTo   ending slot (exclusive) to put the item in
+     * @param item     the item to add
+     * @param handler  the click handler associated to these items
      */
     public void setItems(int slotFrom, int slotTo, ItemStack item, Consumer<InventoryClickEvent> handler) {
-        for (int i = slotFrom; i <= slotTo; i++) {
+        for (int i = slotFrom; i < slotTo; i++) {
             setItem(i, item, handler);
         }
     }
 
     /**
-     * Add an {@link ItemStack} to the inventory on multiple slots.
+     * Add an {@link ItemStack} to the inventory on multiple slots, with no click handler.
      *
-     * @param slots The slots where to add the item
-     * @param item  The item to add.
+     * @param slots the slots where to add the item
+     * @param item  the item to add
      */
     public void setItems(int[] slots, ItemStack item) {
         setItems(slots, item, null);
@@ -206,9 +221,9 @@ public class FastInv implements InventoryHolder {
     /**
      * Add an {@link ItemStack} to the inventory on multiples slots with a click handler.
      *
-     * @param slots   The slots where to add the item
-     * @param item    The item to add.
-     * @param handler The click handler for the item
+     * @param slots   the slots where to add the item
+     * @param item    the item to add
+     * @param handler the click handler associated to this item
      */
     public void setItems(int[] slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
         for (int slot : slots) {
@@ -219,7 +234,7 @@ public class FastInv implements InventoryHolder {
     /**
      * Remove an {@link ItemStack} from the inventory.
      *
-     * @param slot The slot where to remove the item
+     * @param slot the slot from where to remove the item
      */
     public void removeItem(int slot) {
         this.inventory.clear(slot);
@@ -229,7 +244,7 @@ public class FastInv implements InventoryHolder {
     /**
      * Remove multiples {@link ItemStack} from the inventory.
      *
-     * @param slots The slots where to remove the items
+     * @param slots the slots from where to remove the items
      */
     public void removeItems(int... slots) {
         for (int slot : slots) {
@@ -248,45 +263,45 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Add a handler to handle inventory open.
+     * Add a handler that will be called when the inventory is opened.
      *
-     * @param openHandler The handler to add.
+     * @param openHandler the handler to add
      */
     public void addOpenHandler(Consumer<InventoryOpenEvent> openHandler) {
         this.openHandlers.add(openHandler);
     }
 
     /**
-     * Add a handler to handle inventory close.
+     * Add a handler that will be called when the inventory is closed.
      *
-     * @param closeHandler The handler to add
+     * @param closeHandler the handler to add
      */
     public void addCloseHandler(Consumer<InventoryCloseEvent> closeHandler) {
         this.closeHandlers.add(closeHandler);
     }
 
     /**
-     * Add a handler to handle inventory click.
+     * Add a handler that will be called when an item is clicked.
      *
-     * @param clickHandler The handler to add.
+     * @param clickHandler the handler to add
      */
     public void addClickHandler(Consumer<InventoryClickEvent> clickHandler) {
         this.clickHandlers.add(clickHandler);
     }
 
     /**
-     * Open the inventory to a player.
+     * Open the inventory to the given player.
      *
-     * @param player The player to open the menu.
+     * @param player the player to open the inventory to
      */
     public void open(Player player) {
-        player.openInventory(this.inventory);
+        Objects.requireNonNull(player, "player").openInventory(this.inventory);
     }
 
     /**
-     * Get borders of the inventory. If the inventory size is under 27, all slots are returned.
+     * Get the borders of this inventory. If the inventory size is under 27, all slots are returned.
      *
-     * @return inventory borders
+     * @return the inventory borders slots
      */
     public int[] getBorders() {
         int size = this.inventory.getSize();
@@ -295,9 +310,9 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Get corners of the inventory.
+     * Get the corners of this inventory.
      *
-     * @return inventory corners
+     * @return the inventory corners slots
      */
     public int[] getCorners() {
         int size = this.inventory.getSize();
@@ -307,9 +322,9 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Get the Bukkit inventory.
+     * Get the underlying Bukkit inventory.
      *
-     * @return The Bukkit inventory.
+     * @return the Bukkit inventory
      */
     @Override
     public Inventory getInventory() {

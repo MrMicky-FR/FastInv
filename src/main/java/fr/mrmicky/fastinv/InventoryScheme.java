@@ -15,6 +15,7 @@ public class InventoryScheme {
     private final List<String> masks = new ArrayList<>();
     private final Map<Character, ItemStack> items = new HashMap<>();
     private final Map<Character, Consumer<InventoryClickEvent>> handlers = new HashMap<>();
+    private char paginationChar;
 
     /**
      * Add a mask to this scheme including all sort of characters.
@@ -73,6 +74,17 @@ public class InventoryScheme {
     }
 
     /**
+     * Bind character for pagination content.
+     *
+     * @param character the associated character in the mask
+     * @return this scheme instance
+     */
+    public InventoryScheme bindPagination(char character) {
+        this.paginationChar = character;
+        return this;
+    }
+
+    /**
      * Unbind any item from this character.
      *
      * @param character the character to unbind
@@ -90,11 +102,19 @@ public class InventoryScheme {
      * @param inv the FastInv instance to apply this scheme to
      */
     public void apply(FastInv inv) {
+        List<Integer> paginationSlots = new ArrayList<>();
+
         for (int line = 0; line < this.masks.size(); line++) {
             String mask = this.masks.get(line);
 
             for (int slot = 0; slot < mask.length(); slot++) {
                 char c = mask.charAt(slot);
+
+                if (c == this.paginationChar) {
+                    paginationSlots.add(9 * line + slot);
+                    continue;
+                }
+
                 ItemStack item = this.items.get(c);
                 Consumer<InventoryClickEvent> handler = this.handlers.get(c);
 
@@ -102,6 +122,10 @@ public class InventoryScheme {
                     inv.setItem(9 * line + slot, item, handler);
                 }
             }
+        }
+
+        if (inv instanceof PaginatedFastInv && !paginationSlots.isEmpty()) {
+            ((PaginatedFastInv) inv).setContentSlots(paginationSlots);
         }
     }
 }
