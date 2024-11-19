@@ -232,6 +232,29 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Add an {@link ItemStack} to the inventory on multiple slots, with no click handler.
+     *
+     * @param slots the list of slots where to add the item
+     * @param item  the item to add
+     */
+    public void setItems(List<Integer> slots, ItemStack item) {
+        setItems(slots, item, null);
+    }
+
+    /**
+     * Add an {@link ItemStack} to the inventory on multiple slots with a click handler.
+     *
+     * @param slots   the list of slots where to add the item
+     * @param item    the item to add
+     * @param handler the click handler associated to this item
+     */
+    public void setItems(List<Integer> slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
+        for (Integer slot : slots) {
+            setItem(slot, item, handler);
+        }
+    }
+
+    /**
      * Remove an {@link ItemStack} from the inventory.
      *
      * @param slot the slot from where to remove the item
