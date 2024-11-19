@@ -276,6 +276,19 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Clears all items from the inventory.
+     *
+     * This method iterates through each slot in the inventory
+     * and sets its content to {@code null}, effectively removing
+     * all items and leaving the inventory empty.
+     */
+    public void clearInventory() {
+        for (int i = 0; i < getInventory().getSize(); i++) {
+            setItem(i, null);
+        }
+    }
+
+    /**
      * Add a close filter to prevent players from closing the inventory.
      * To prevent a player from closing the inventory the predicate should return {@code true}.
      *
