@@ -237,7 +237,7 @@ public class FastInv implements InventoryHolder {
      * @param slots the list of slots where to add the item
      * @param item  the item to add
      */
-    public void setItems(List<Integer> slots, ItemStack item) {
+    public void setItems(Iterable<Integer> slots, ItemStack item) {
         setItems(slots, item, null);
     }
 
@@ -248,7 +248,7 @@ public class FastInv implements InventoryHolder {
      * @param item    the item to add
      * @param handler the click handler associated to this item
      */
-    public void setItems(List<Integer> slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
+    public void setItems(Iterable<Integer> slots, ItemStack item, Consumer<InventoryClickEvent> handler) {
         for (Integer slot : slots) {
             setItem(slot, item, handler);
         }
@@ -276,16 +276,11 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
-     * Clears all items from the inventory.
-     *
-     * This method iterates through each slot in the inventory
-     * and sets its content to {@code null}, effectively removing
-     * all items and leaving the inventory empty.
+     * Clear all items from the inventory and remove the click handlers.
      */
-    public void clearInventory() {
-        for (int i = 0; i < getInventory().getSize(); i++) {
-            setItem(i, null);
-        }
+    public void clearItems() {
+        this.inventory.clear();
+        this.itemHandlers.clear();
     }
 
     /**
