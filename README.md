@@ -6,10 +6,11 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 
 ## Features
 
-* Lightweight (less than 400 lines of code with the JavaDoc) and no dependencies
+* Lightweight (around 500 lines of code with the JavaDoc) and no dependencies
 * Compatible with all Minecraft versions starting with 1.7.10
 * [Adventure components support](#adventure-components-support)
 * Supports custom inventories (size, title and type)
+* Built-in support for [paginated inventories](#paginated-inventory)
 * Easy to use
 * Option to prevent a player from closing the inventory
 * The Bukkit inventory can still be directly used
@@ -57,7 +58,7 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
     <dependency>
         <groupId>fr.mrmicky</groupId>
         <artifactId>FastInv</artifactId>
-        <version>3.1.0</version>
+        <version>3.1.1</version>
     </dependency>
 </dependencies>
 ```
@@ -74,7 +75,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'fr.mrmicky:FastInv:3.1.0'
+    implementation 'fr.mrmicky:FastInv:3.1.1'
 }
 
 shadowJar {

@@ -25,10 +25,7 @@ package fr.mrmicky.fastinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
@@ -44,7 +41,7 @@ import java.util.stream.IntStream;
  * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
  *
  * @author MrMicky
- * @version 3.1.0
+ * @version 3.1.1
  */
 public class FastInv implements InventoryHolder {
 
@@ -52,6 +49,7 @@ public class FastInv implements InventoryHolder {
     private final List<Consumer<InventoryOpenEvent>> openHandlers = new ArrayList<>();
     private final List<Consumer<InventoryCloseEvent>> closeHandlers = new ArrayList<>();
     private final List<Consumer<InventoryClickEvent>> clickHandlers = new ArrayList<>();
+    private final List<Consumer<InventoryDragEvent>> dragHandlers = new ArrayList<>();
 
     private final Inventory inventory;
 
@@ -124,6 +122,14 @@ public class FastInv implements InventoryHolder {
      * @param event the InventoryClickEvent that triggered this method
      */
     protected void onClick(InventoryClickEvent event) {
+    }
+
+    /**
+     * Called when the player drags an item in their cursor across the inventory.
+     *
+     * @param event the InventoryDragEvent that triggered this method
+     */
+    protected void onDrag(InventoryDragEvent event) {
     }
 
     /**
@@ -321,6 +327,15 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Add a handler that will be called when the player drags an item in their cursor across the inventory.
+     *
+     * @param dragHandler the handler to add
+     */
+    public void addDragHandler(Consumer<InventoryDragEvent> dragHandler) {
+        this.dragHandlers.add(dragHandler);
+    }
+
+    /**
      * Open the inventory to the given player.
      *
      * @param player the player to open the inventory to
@@ -386,5 +401,11 @@ public class FastInv implements InventoryHolder {
         if (clickConsumer != null) {
             clickConsumer.accept(e);
         }
+    }
+
+    void handleDrag(InventoryDragEvent e) {
+        onDrag(e);
+
+        this.dragHandlers.forEach(c -> c.accept(e));
     }
 }
