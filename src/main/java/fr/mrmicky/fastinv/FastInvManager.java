@@ -33,7 +33,6 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.Plugin;
 
@@ -82,8 +81,7 @@ public final class FastInvManager {
             getTopInventoryMethod.setAccessible(true);
             for (Player p : Bukkit.getOnlinePlayers()) {
                 Inventory top = (Inventory) getTopInventoryMethod.invoke(p.getOpenInventory());
-                InventoryHolder holder = top.getHolder();
-                if (holder instanceof FastInv)
+                if (top.getHolder() instanceof FastInv)
                     p.closeInventory();
             }
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
