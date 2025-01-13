@@ -32,10 +32,16 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.plugin.Plugin;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 /**
  * Manager for FastInv listeners.
@@ -71,9 +77,18 @@ public final class FastInvManager {
      * Close all open FastInv inventories.
      */
     public static void closeAll() {
-        Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
-                .forEach(Player::closeInventory);
+        try {
+            Method getTopInventoryMethod = InventoryView.class.getDeclaredMethod("getTopInventory");
+            getTopInventoryMethod.setAccessible(true);
+            for (Player p : Bukkit.getOnlinePlayers()) {
+                Inventory top = (Inventory) getTopInventoryMethod.invoke(p.getOpenInventory());
+                InventoryHolder holder = top.getHolder();
+                if (holder instanceof FastInv)
+                    p.closeInventory();
+            }
+        } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+            Bukkit.getLogger().log(Level.WARNING, "Failed to close all FastInv inventories", e);
+        }
     }
 
     public static final class InventoryListener implements Listener {
