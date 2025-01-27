@@ -67,15 +67,6 @@ public final class FastInvManager {
         Bukkit.getPluginManager().registerEvents(new InventoryListener(plugin), plugin);
     }
 
-    /**
-     * Close all open FastInv inventories.
-     */
-    public static void closeAll() {
-        Bukkit.getOnlinePlayers().stream()
-                .filter(p -> p.getOpenInventory().getTopInventory().getHolder() instanceof FastInv)
-                .forEach(Player::closeInventory);
-    }
-
     public static final class InventoryListener implements Listener {
 
         private final Plugin plugin;
@@ -141,8 +132,6 @@ public final class FastInvManager {
         @EventHandler
         public void onPluginDisable(PluginDisableEvent e) {
             if (e.getPlugin() == this.plugin) {
-                closeAll();
-
                 REGISTERED.set(false);
             }
         }
