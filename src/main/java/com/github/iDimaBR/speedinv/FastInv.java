@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package fr.mrmicky.fastinv;
+package com.github.iDimaBR.speedinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -34,26 +34,27 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
-/**
- * Lightweight and easy-to-use inventory API for Bukkit plugins.
- * The project is on <a href="https://github.com/MrMicky-FR/FastInv">GitHub</a>.
- *
- * @author MrMicky
- * @version 3.1.2
- */
 public class FastInv implements InventoryHolder {
 
     private final Map<Integer, Consumer<InventoryClickEvent>> itemHandlers = new HashMap<>();
+    private final Map<Integer, Supplier<ItemStack>> dynamicItems = new HashMap<>();
     private final List<Consumer<InventoryOpenEvent>> openHandlers = new ArrayList<>();
     private final List<Consumer<InventoryCloseEvent>> closeHandlers = new ArrayList<>();
     private final List<Consumer<InventoryClickEvent>> clickHandlers = new ArrayList<>();
     private final List<Consumer<InventoryDragEvent>> dragHandlers = new ArrayList<>();
+    private final List<Integer> allowedClickSlots = new ArrayList<>();
+    private boolean allowInventoryPlayer = false;
 
     private final Inventory inventory;
 
     private Predicate<Player> closeFilter;
+
+    private long autoUpdateInterval = 0L;
+    private boolean autoUpdateRegistered = false;
+    private long lastUpdateTick = 0;
 
     /**
      * Create a new FastInv with a custom size.
@@ -106,6 +107,7 @@ public class FastInv implements InventoryHolder {
         }
 
         this.inventory = inv;
+        FastInvManager.registerMenu(this);
     }
 
     /**
@@ -147,6 +149,56 @@ public class FastInv implements InventoryHolder {
      */
     public void addItem(ItemStack item) {
         addItem(item, null);
+    }
+
+    /**
+     * Add a dynamic {@link ItemStack} supplier to the inventory on a specific slot,
+     * with no click handler.
+     *
+     * @param slot     the slot where to add the item
+     * @param supplier supplier that provides the item dynamically
+     */
+    public void setDynamicItem(int slot, Supplier<ItemStack> supplier) {
+        setDynamicItem(slot, supplier, null);
+    }
+
+    /**
+     * Add a dynamic {@link ItemStack} supplier to the inventory on a specific slot,
+     * with a click handler.
+     *
+     * @param slot     the slot where to add the item
+     * @param supplier supplier that provides the item dynamically
+     * @param handler  the click handler associated with this item
+     */
+    public void setDynamicItem(int slot, Supplier<ItemStack> supplier, Consumer<InventoryClickEvent> handler) {
+        Objects.requireNonNull(supplier, "supplier");
+
+        this.dynamicItems.put(slot, supplier);
+        this.inventory.setItem(slot, supplier.get());
+
+        if (handler != null) {
+            this.itemHandlers.put(slot, handler);
+        } else {
+            this.itemHandlers.remove(slot);
+        }
+    }
+
+    /**
+     * Refresh only the dynamic items (re-fetch supplier values).
+     */
+    public void refreshDynamicItems() {
+        for (Map.Entry<Integer, Supplier<ItemStack>> e : dynamicItems.entrySet()) {
+            this.inventory.setItem(e.getKey(), e.getValue().get());
+        }
+    }
+
+    /**
+     * Remove a dynamic item from the inventory.
+     */
+    public void removeDynamicItem(int slot) {
+        this.dynamicItems.remove(slot);
+        this.inventory.clear(slot);
+        this.itemHandlers.remove(slot);
     }
 
     /**
@@ -282,6 +334,44 @@ public class FastInv implements InventoryHolder {
     }
 
     /**
+     * Define whether players are allowed to interact with their own inventory while this inventory is open.
+     */
+    public void setAllowInventoryPlayer(boolean value) {
+        this.allowInventoryPlayer = value;
+    }
+
+    /**
+     * Check whether players are allowed to interact with their own inventory while this inventory is open.
+     */
+    public boolean isAllowInventoryPlayer() {
+        return allowInventoryPlayer;
+    }
+
+    /**
+     * Fill all empty slots in the inventory with the given item and optional click handler.
+     * If there are no empty slots, nothing happens.
+     *
+     * @param item    The item to put in empty slots
+     * @param handler Optional click handler associated with the item
+     */
+    public void fillEmptySlots(ItemStack item, Consumer<InventoryClickEvent> handler) {
+        for (int i = 0; i < this.inventory.getSize(); i++) {
+            if (this.inventory.getItem(i) == null) {
+                setItem(i, item, handler);
+            }
+        }
+    }
+
+    /**
+     * Fill specific slots in the inventory with the given item, regardless of whether they are empty or not.
+     */
+    public void fillSlots(ItemStack item, int... slots) {
+        for (int slot : slots) {
+            setItem(slot, item);
+        }
+    }
+
+    /**
      * Clear all items from the inventory and remove the click handlers.
      */
     public void clearItems() {
@@ -297,6 +387,99 @@ public class FastInv implements InventoryHolder {
      */
     public void setCloseFilter(Predicate<Player> closeFilter) {
         this.closeFilter = closeFilter;
+    }
+
+    /**
+     * Set slots where clicks are allowed.
+     */
+    public void setAllowedClickSlots(int... slots) {
+        this.allowedClickSlots.clear();
+        for (int slot : slots) {
+            this.allowedClickSlots.add(slot);
+        }
+    }
+
+    /**
+     * Add slots where clicks are allowed.
+     */
+    public void addAllowedClickSlots(int... slots) {
+        for (int slot : slots) {
+            if (!this.allowedClickSlots.contains(slot)) {
+                this.allowedClickSlots.add(slot);
+            }
+        }
+    }
+
+    /**
+     * Get the list of slots where clicks are allowed.
+     *
+     * @return the list of allowed click slots
+     */
+    public List<Integer> getAllowedClickSlots() {
+        return Collections.unmodifiableList(this.allowedClickSlots);
+    }
+
+    /**
+     * Clear the list of slots where clicks are allowed (all slots will be allowed).
+     */
+    public void clearAllowedClickSlots() {
+        this.allowedClickSlots.clear();
+    }
+
+    /**
+     * Check if a slot is in the list of allowed click slots.
+     */
+    public boolean isClickAllowed(int slot) {
+        return this.allowedClickSlots.isEmpty() || this.allowedClickSlots.contains(slot);
+    }
+
+    /**
+     * Set the inventory to auto-update every given interval (in ticks).
+     * Set to 0 to disable auto-updating.
+     * <p>
+     * Note: Auto-updating only refreshes dynamic items, it does not call .
+     *
+     * @param interval the update interval in ticks
+     */
+    public void setAutoUpdate(long interval) {
+        this.autoUpdateInterval = interval;
+        if (!autoUpdateRegistered && interval != 0) {
+            FastInvManager.enableUpdate(this);
+            autoUpdateRegistered = true;
+        }else{
+            FastInvManager.disableUpdate(this);
+            autoUpdateRegistered = false;
+        }
+    }
+
+    /*
+        * Get the last tick when the inventory was updated.
+     */
+    public long getLastUpdateTick() {
+        return lastUpdateTick;
+    }
+
+    /*
+        * Set the last tick when the inventory was updated.
+     */
+    public void setLastUpdateTick(long lastUpdateTick) {
+        this.lastUpdateTick = lastUpdateTick;
+    }
+
+    /**
+     * Get the auto-update interval in ticks.
+     *
+     * @return the auto-update interval
+     */
+    public long getAutoUpdateInterval() {
+        return autoUpdateInterval;
+    }
+
+    /*
+        * Check if the inventory is registered for auto-updating.
+     */
+    public boolean isAutoUpdateRegistered() {
+        return autoUpdateRegistered;
     }
 
     /**
@@ -353,6 +536,32 @@ public class FastInv implements InventoryHolder {
         int size = this.inventory.getSize();
         return IntStream.range(0, size).filter(i -> size < 27 || i < 9
                 || i % 9 == 0 || (i - 8) % 9 == 0 || i > size - 9).toArray();
+    }
+
+    /**
+     * Get the edges of this inventory. If the inventory size is under 27, all slots are returned.
+     */
+    public int[] getEdges() {
+        int size = this.inventory.getSize();
+        return IntStream.range(0, size).filter(i -> size < 27 || i < 9
+                || i % 9 == 0 || (i - 8) % 9 == 0 || (i > size - 10 && i < size - 8)).toArray();
+    }
+
+    /**
+     * Get the center slots of this inventory. If the inventory size is under 27, an empty array is returned.
+     */
+    public int[] getCenter() {
+        int size = this.inventory.getSize();
+        return IntStream.range(0, size).filter(i -> i > 8 && i < size - 9
+                && i % 9 != 0 && (i - 8) % 9 != 0).toArray();
+    }
+
+    /**
+     * Get all slots of this inventory.
+     */
+    public int[] getAllSlots() {
+        int size = this.inventory.getSize();
+        return IntStream.range(0, size).toArray();
     }
 
     /**

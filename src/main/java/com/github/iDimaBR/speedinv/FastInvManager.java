@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package fr.mrmicky.fastinv;
+package com.github.iDimaBR.speedinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -33,8 +33,9 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitScheduler;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,10 +45,41 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class FastInvManager {
 
+    private static final Map<Class<? extends FastInv>, FastInv> INVENTORIES = new HashMap<>();
     private static final AtomicBoolean REGISTERED = new AtomicBoolean(false);
+    private static final Set<FastInv> UPDATABLE_INVENTORIES = Collections.newSetFromMap(new WeakHashMap<>());
 
     private FastInvManager() {
         throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Register a FastInv menu to be opened later using {@link #open(Class, Player)}.
+     * If the menu has an auto-update interval greater than 0, it will be automatically
+     * added to the update list.
+     *
+     * @param menu menu to register
+     * @param <T>  type of the menu
+     */
+    public static <T extends FastInv> void registerMenu(T menu) {
+        INVENTORIES.put(menu.getClass(), menu);
+        if (menu.getAutoUpdateInterval() > 0) {
+            FastInvManager.enableUpdate(menu);
+        }
+    }
+
+    /**
+     * Open a previously registered FastInv menu for a player.
+     *
+     * @param clazz  class of the menu
+     * @param player player to open the menu for
+     * @param <T>    type of the menu
+     */
+    public static <T extends FastInv> void open(Class<T> clazz, Player player) {
+        FastInv menu = INVENTORIES.get(clazz);
+        if (menu != null) {
+            menu.open(player);
+        }
     }
 
     /**
@@ -65,6 +97,37 @@ public final class FastInvManager {
         }
 
         Bukkit.getPluginManager().registerEvents(new InventoryListener(plugin), plugin);
+        startUpdater(plugin);
+    }
+
+    private static void startUpdater(Plugin plugin) {
+        final BukkitScheduler scheduler = Bukkit.getScheduler();
+        scheduler.runTaskTimerAsynchronously(plugin, new Runnable() {
+            private long currentTick = 0;
+            @Override
+            public void run() {
+                currentTick++;
+                for (FastInv inv : UPDATABLE_INVENTORIES) {
+                    long interval = inv.getAutoUpdateInterval();
+                    if (interval > 0 && currentTick - inv.getLastUpdateTick() >= interval) {
+                        if (!inv.getInventory().getViewers().isEmpty()) {
+                            scheduler.runTask(plugin, () -> {
+                                inv.refreshDynamicItems();
+                                inv.setLastUpdateTick(currentTick);
+                            });
+                        }
+                    }
+                }
+            }
+        }, 1L, 1L);
+    }
+
+    public static void enableUpdate(FastInv inv) {
+        UPDATABLE_INVENTORIES.add(inv);
+    }
+
+    public static void disableUpdate(FastInv inv) {
+        UPDATABLE_INVENTORIES.remove(inv);
     }
 
     public static final class InventoryListener implements Listener {
@@ -80,33 +143,39 @@ public final class FastInvManager {
             if (e.getInventory().getHolder() instanceof FastInv && e.getClickedInventory() != null) {
                 FastInv inv = (FastInv) e.getInventory().getHolder();
 
-                boolean wasCancelled = e.isCancelled();
-                e.setCancelled(true);
+                if (e.getClickedInventory() == e.getInventory()) {
+                    int slot = e.getRawSlot();
+                    boolean allowed = inv.isClickAllowed(slot) || e.isCancelled();
+                    if (!allowed) {
+                        e.setCancelled(true);
+                    }
+                    inv.handleClick(e);
+                }
 
-                inv.handleClick(e);
-
-                // This prevents uncanceling the event if another plugin canceled it before
-                if (!wasCancelled && !e.isCancelled()) {
-                    e.setCancelled(false);
+                if(!inv.isAllowInventoryPlayer()){
+                    if (e.getClickedInventory() == e.getWhoClicked().getInventory()) {
+                        e.setCancelled(true);
+                    }
                 }
             }
         }
 
         @EventHandler
         public void onInventoryDrag(InventoryDragEvent e) {
-            if (e.getInventory().getHolder() instanceof FastInv) {
-                FastInv inv = (FastInv) e.getInventory().getHolder();
+            if (!(e.getInventory().getHolder() instanceof FastInv)) return;
 
-                boolean wasCancelled = e.isCancelled();
-                e.setCancelled(true);
+            FastInv inv = (FastInv) e.getInventory().getHolder();
 
-                inv.handleDrag(e);
-
-                // This prevents uncanceling the event if another plugin canceled it before
-                if (!wasCancelled && !e.isCancelled()) {
-                    e.setCancelled(false);
+            boolean cancel = false;
+            for (int slot : e.getRawSlots()) {
+                if (slot < e.getInventory().getSize()) {
+                    if (!inv.isClickAllowed(slot)) cancel = true;
+                } else if (!inv.isAllowInventoryPlayer()) {
+                    cancel = true;
                 }
             }
+
+            if (cancel) e.setCancelled(true);
         }
 
         @EventHandler

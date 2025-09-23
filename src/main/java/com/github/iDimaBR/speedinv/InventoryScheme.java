@@ -1,4 +1,4 @@
-package fr.mrmicky.fastinv;
+package com.github.iDimaBR.speedinv;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;

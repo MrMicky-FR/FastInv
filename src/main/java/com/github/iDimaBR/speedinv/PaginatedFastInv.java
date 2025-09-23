@@ -1,4 +1,4 @@
-package fr.mrmicky.fastinv;
+package com.github.iDimaBR.speedinv;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -228,6 +228,10 @@ public class PaginatedFastInv extends FastInv {
         int index = this.contentSlots.size() * (this.page - 1);
 
         for (int slot : this.contentSlots) {
+            if (slot >= getInventory().getSize()) {
+                continue;
+            }
+
             if (index >= this.contentItems.size()) {
                 removeItem(slot);
                 continue;

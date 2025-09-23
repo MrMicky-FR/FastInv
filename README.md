@@ -1,6 +1,4 @@
-# FastInv
-
-[![JitPack](https://jitpack.io/v/fr.mrmicky/fastinv.svg)](https://jitpack.io/#fr.mrmicky/FastInv)
+# SpeedInv (Better fork of FastInv)
 
 Lightweight and easy-to-use inventory API for Bukkit plugins.
 
@@ -14,6 +12,8 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 * Easy to use
 * Option to prevent a player from closing the inventory
 * The Bukkit inventory can still be directly used
+* Auto update for all inventories if you need
+* Dynamic items in simple and paginated inventories
 
 ## Installation
 
@@ -37,9 +37,9 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
             <configuration>
                 <relocations>
                     <relocation>
-                        <pattern>fr.mrmicky.fastinv</pattern>
+                        <pattern>com.github.iDimaBR.speedinv</pattern>
                         <!-- Replace 'com.yourpackae' with the package of your plugin! -->
-                        <shadedPattern>com.yourpackage.fastinv</shadedPattern>
+                        <shadedPattern>com.yourpackage.speedinv</shadedPattern>
                     </relocation>
                 </relocations>
             </configuration>
@@ -56,9 +56,9 @@ Lightweight and easy-to-use inventory API for Bukkit plugins.
 
 <dependencies>
     <dependency>
-        <groupId>fr.mrmicky</groupId>
-        <artifactId>fastinv</artifactId>
-        <version>3.1.2</version>
+        <groupId>com.github.iDimaBR</groupId>
+        <artifactId>speedinv</artifactId>
+        <version>-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
@@ -75,12 +75,12 @@ repositories {
 }
 
 dependencies {
-    implementation 'fr.mrmicky:fastinv:3.1.2'
+    implementation 'com.github.iDimaBR:speedinv:-SNAPSHOT'
 }
 
 shadowJar {
     // Replace 'com.yourpackage' with the package of your plugin 
-    relocate 'fr.mrmicky.fastinv', 'com.yourpackage.fastinv'
+    relocate 'com.github.iDimaBR.speedinv', 'com.yourpackage.speedinv'
 }
 ```
 
@@ -97,7 +97,12 @@ Before creating inventories, register your plugin by adding `FastInvManager.regi
 ```java
 @Override
 public void onEnable() {
+    loadInventories();
+}
+
+private void loadInventories(){
     FastInvManager.register(this);
+    new ExampleInventory(3 * 9, "Example Inventory");
 }
 ```
 
@@ -109,10 +114,8 @@ You can also override `onClick`, `onClose` and `onOpen` if you need.
 Basic example inventory:
 
 ```java
-package fr.mrmicky.fastinv.test;
-
-import fr.mrmicky.fastinv.FastInv;
-import fr.mrmicky.fastinv.ItemBuilder;
+import com.github.iDimaBR.speedinv.FastInv;
+import com.github.iDimaBR.speedinv.ItemBuilder;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -124,8 +127,8 @@ public class ExampleInventory extends FastInv {
 
     private boolean preventClose = false;
 
-    public ExampleInventory() {
-        super(45, ChatColor.GOLD + "Example inventory");
+    public ExampleInventory(int size, String title) {
+        super(size, title);
 
         // Add a random item
         setItem(22, new ItemStack(Material.IRON_SWORD), e -> e.getWhoClicked().sendMessage("You clicked on the sword"));
@@ -138,8 +141,38 @@ public class ExampleInventory extends FastInv {
             this.preventClose = !this.preventClose;
         });
 
+        // Allow slots interaction (like 36 slot of inventory)
+        setItem(36, new ItemBuilder(Material.DIRT).name(ChatColor.RED + "Pick me").build());
+        setAllowedClickSlots(36);
+
+        // Allow interaction in player's inventory with menu open
+        setAllowInventoryPlayer(true); // false disable it
+
+        // Define dynamic items for auto update
+        setDynamicItem(24, () -> {
+            int ticks = player.getStatistic(Statistic.PLAY_ONE_MINUTE);
+            int totalSeconds = ticks / 20;
+            int hours = totalSeconds / 3600;
+            int minutes = (totalSeconds % 3600) / 60;
+            int seconds = totalSeconds % 60;
+
+            String timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+            return new ItemBuilder(Material.CLOCK)
+                    .name("Online Time: " + timeFormatted)
+                    .build();
+        }, e -> p.sendMessage("You clicked on me!"));
+
         // Prevent from closing when preventClose is true
         setCloseFilter(p -> this.preventClose);
+
+        // Define autoupdate for dynamic items to true
+        setAutoUpdate(20L) // 1 second
+
+        // Define autoupdate for dynamic items to false
+        setAutoUpdate(0L); // no interval
+
+        // You can also call this method for update all dynamic items manually
+        refreshDynamicItems();
     }
 
     @Override
@@ -159,9 +192,9 @@ public class ExampleInventory extends FastInv {
 }
 ```
 
-The inventory can be opened with the `open(player)` method:
+The inventory can be opened with the `open(Class<T>, Player)` method:
 ```java
-new ExampleInventory().open(player);
+FastInvManager.open(ExampleInventory.class, player);
 ```
 
 ### Paginated inventory
@@ -215,9 +248,9 @@ public class ExamplePaginatedInventory extends PaginatedFastInv {
 }
 ```
 
-Like a normal inventory, you can open the paginated inventory with `open(player)`:
+Like a normal inventory, you can open the paginated inventory with `open(Class<T>, Player)`:
 ```java
-new ExamplePaginatedInventory().open(player);
+FastInvManager.open(ExamplePaginatedInventory.class, player);
 ```
 
 ### Creating a 'compact' inventory
